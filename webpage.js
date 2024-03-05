@@ -1,6 +1,7 @@
 let lastElement = null; // 记录上一次的元素
 let isLeftClickDisabled = false; // 是否禁用左键点击的标志
 const selectedElement = new Map(); // 用于存储选中的元素和其内嵌文本
+const parentStack = []; // 记录 'w' 操作的路径
 
 document.addEventListener('mousedown', function (event) {
     if (event.button === 2) { // 右键按下
@@ -21,6 +22,7 @@ document.addEventListener('mouseup', function (event) {
             lastElement.style.border = ''; // 清除边框
             lastElement = null;
         }
+        parentStack.length = 0; // 清空 parentStack
     }
 });
 
@@ -67,10 +69,27 @@ function handleKeyDown(event) {
     if (event.key === 'w' && lastElement) {
         const parentElement = lastElement.parentNode; // 获取当前元素的父元素
         if (parentElement) {
+            parentStack.push(lastElement); // 将当前元素压入 parentStack
             // 将红色边框应用于父元素
             parentElement.style.border = '2px solid red';
             lastElement.style.border = ''; // 清除当前元素的边框
             lastElement = parentElement; // 更新 lastElement 为父元素
+        }
+    } else if (event.key === 's' && lastElement) {
+        if (parentStack.length > 0) {
+            // 如果 parentStack 不为空,取出栈顶元素作为目标子元素
+            const childElement = parentStack.pop();
+            childElement.style.border = '2px solid red';
+            lastElement.style.border = ''; // 清除当前元素的边框
+            lastElement = childElement; // 更新 lastElement 为目标子元素
+        } else {
+            const firstChild = lastElement.firstElementChild; // 获取当前元素的第一个子元素
+            if (firstChild) {
+                // 如果当前元素有子元素,将红色边框应用于第一个子元素
+                firstChild.style.border = '2px solid red';
+                lastElement.style.border = ''; // 清除当前元素的边框
+                lastElement = firstChild; // 更新 lastElement 为第一个子元素
+            }
         }
     }
 }

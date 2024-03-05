@@ -1,5 +1,5 @@
 const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
-const apiKey = 'sk-7a33e89029e8b09cf75f948564e8d258cf7d5782eec3f076';
+const apiKey = 'sk-keajPSyenhp0c4SmEc8f3eE21c35405e8e02F872D03bD12f';
 
 // 定义每个分块的最大长度
 const MAX_CHUNK_LENGTH = 200;

@@ -1,10 +1,13 @@
 let lastElement = null; // 记录上一次的元素
 let isLeftClickDisabled = false; // 是否禁用左键点击的标志
+let isLeftMouseDown = false; // 记录左键是否按下的标志
 const selectedElement = new Map(); // 用于存储选中的元素和其内嵌文本
 const parentStack = []; // 记录 'w' 操作的路径
 
 document.addEventListener('mousedown', function (event) {
-    if (event.button === 2) { // 右键按下
+    if (event.button === 0) { // 左键按下
+        isLeftMouseDown = true;
+    } else if (event.button === 2) { // 右键按下
         isLeftClickDisabled = true; // 设置禁用左键点击的标志为 true
         document.addEventListener('mousemove', handleMouseMove); // 监听鼠标移动
         document.addEventListener('click', handleLeftClick, {capture: true}); // 在捕获阶段监听左键点击
@@ -13,7 +16,9 @@ document.addEventListener('mousedown', function (event) {
 });
 
 document.addEventListener('mouseup', function (event) {
-    if (event.button === 2) { // 右键松开
+    if (event.button === 0) { // 左键松开
+        isLeftMouseDown = false;
+    } else if (event.button === 2) { // 右键松开
         isLeftClickDisabled = false; // 设置禁用左键点击的标志为 false
         document.removeEventListener('mousemove', handleMouseMove); // 移除鼠标移动监听
         document.removeEventListener('click', handleLeftClick, {capture: true}); // 移除左键点击监听
@@ -66,7 +71,10 @@ function handleLeftClick(event) {
 
 // 处理键盘按下事件
 function handleKeyDown(event) {
-    if (event.key === 'a' && lastElement) {
+    if (lastElement == null) {
+        return;
+    }
+    if (event.key === 'a') {
         const parentElement = lastElement.parentNode; // 获取当前元素的父元素
         if (parentElement) {
             parentStack.push(lastElement); // 将当前元素压入 parentStack
@@ -75,7 +83,7 @@ function handleKeyDown(event) {
             lastElement.style.border = ''; // 清除当前元素的边框
             lastElement = parentElement; // 更新 lastElement 为父元素
         }
-    } else if (event.key === 'd' && lastElement) {
+    } else if (event.key === 'd') {
         if (parentStack.length > 0) {
             // 如果 parentStack 不为空,取出栈顶元素作为目标子元素
             const childElement = parentStack.pop();
@@ -91,15 +99,24 @@ function handleKeyDown(event) {
                 lastElement = firstChild; // 更新 lastElement 为第一个子元素
             }
         }
-    } else if (event.key === 'w' && lastElement) {
+    } else if (event.key === 'w') {
         const previousSibling = lastElement.previousElementSibling; // 获取当前元素的上一个兄弟元素
         if (previousSibling) {
             // 如果存在上一个兄弟元素,将红色边框应用于上一个兄弟元素
             previousSibling.style.border = '2px solid red';
             lastElement.style.border = ''; // 清除当前元素的边框
             lastElement = previousSibling; // 更新 lastElement 为上一个兄弟元素
+
         }
-    } else if (event.key === 's' && lastElement) {
+        if (isLeftMouseDown) {
+            // 如果左键也按下,触发左键点击事件
+            handleLeftClick(event);
+        }
+    } else if (event.key === 's') {
+        if (isLeftMouseDown) {
+            // 如果左键也按下,触发左键点击事件
+            handleLeftClick(event);
+        }
         const nextSibling = lastElement.nextElementSibling; // 获取当前元素的下一个兄弟元素
         if (nextSibling) {
             // 如果存在下一个兄弟元素,将红色边框应用于下一个兄弟元素
@@ -109,6 +126,7 @@ function handleKeyDown(event) {
         }
     }
 }
+
 /**
  * 获取元素的唯一路径
  * @param {Element} element - 目标元素

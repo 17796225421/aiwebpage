@@ -66,7 +66,7 @@ function handleLeftClick(event) {
 
 // 处理键盘按下事件
 function handleKeyDown(event) {
-    if (event.key === 'w' && lastElement) {
+    if (event.key === 'a' && lastElement) {
         const parentElement = lastElement.parentNode; // 获取当前元素的父元素
         if (parentElement) {
             parentStack.push(lastElement); // 将当前元素压入 parentStack
@@ -75,7 +75,7 @@ function handleKeyDown(event) {
             lastElement.style.border = ''; // 清除当前元素的边框
             lastElement = parentElement; // 更新 lastElement 为父元素
         }
-    } else if (event.key === 's' && lastElement) {
+    } else if (event.key === 'd' && lastElement) {
         if (parentStack.length > 0) {
             // 如果 parentStack 不为空,取出栈顶元素作为目标子元素
             const childElement = parentStack.pop();
@@ -91,9 +91,24 @@ function handleKeyDown(event) {
                 lastElement = firstChild; // 更新 lastElement 为第一个子元素
             }
         }
+    } else if (event.key === 'w' && lastElement) {
+        const previousSibling = lastElement.previousElementSibling; // 获取当前元素的上一个兄弟元素
+        if (previousSibling) {
+            // 如果存在上一个兄弟元素,将红色边框应用于上一个兄弟元素
+            previousSibling.style.border = '2px solid red';
+            lastElement.style.border = ''; // 清除当前元素的边框
+            lastElement = previousSibling; // 更新 lastElement 为上一个兄弟元素
+        }
+    } else if (event.key === 's' && lastElement) {
+        const nextSibling = lastElement.nextElementSibling; // 获取当前元素的下一个兄弟元素
+        if (nextSibling) {
+            // 如果存在下一个兄弟元素,将红色边框应用于下一个兄弟元素
+            nextSibling.style.border = '2px solid red';
+            lastElement.style.border = ''; // 清除当前元素的边框
+            lastElement = nextSibling; // 更新 lastElement 为下一个兄弟元素
+        }
     }
 }
-
 /**
  * 获取元素的唯一路径
  * @param {Element} element - 目标元素

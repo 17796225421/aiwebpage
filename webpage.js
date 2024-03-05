@@ -7,6 +7,7 @@ document.addEventListener('mousedown', function (event) {
         isLeftClickDisabled = true; // 设置禁用左键点击的标志为 true
         document.addEventListener('mousemove', handleMouseMove); // 监听鼠标移动
         document.addEventListener('click', handleLeftClick, {capture: true}); // 在捕获阶段监听左键点击
+        document.addEventListener('keydown', handleKeyDown); // 监听键盘按下事件
     }
 });
 
@@ -15,6 +16,7 @@ document.addEventListener('mouseup', function (event) {
         isLeftClickDisabled = false; // 设置禁用左键点击的标志为 false
         document.removeEventListener('mousemove', handleMouseMove); // 移除鼠标移动监听
         document.removeEventListener('click', handleLeftClick, {capture: true}); // 移除左键点击监听
+        document.removeEventListener('keydown', handleKeyDown); // 移除键盘按下事件监听
         if (lastElement) {
             lastElement.style.border = ''; // 清除边框
             lastElement = null;
@@ -53,9 +55,22 @@ function handleLeftClick(event) {
                 // 如果哈希表中不存在该元素,则加入哈希表,并设置绿色背景和边距
                 selectedElement.set(path, text);
                 lastElement.style.backgroundColor = 'SeaGreen';
-                lastElement.style.padding = '50px'; // 添加内边距,增加元素间距
+                lastElement.style.padding = '30px'; // 添加内边距,增加元素间距
             }
             console.log(selectedElement);
+        }
+    }
+}
+
+// 处理键盘按下事件
+function handleKeyDown(event) {
+    if (event.key === 'w' && lastElement) {
+        const parentElement = lastElement.parentNode; // 获取当前元素的父元素
+        if (parentElement) {
+            // 将红色边框应用于父元素
+            parentElement.style.border = '2px solid red';
+            lastElement.style.border = ''; // 清除当前元素的边框
+            lastElement = parentElement; // 更新 lastElement 为父元素
         }
     }
 }

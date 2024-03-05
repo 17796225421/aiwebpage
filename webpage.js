@@ -1,27 +1,28 @@
 let lastElement = null; // 记录上一次的元素
 let isLeftClickDisabled = false; // 是否禁用左键点击的标志
+const selectedElement = new Map(); // 用于存储选中的元素和其内嵌文本
 
-document.addEventListener('mousedown', function(event) {
+document.addEventListener('mousedown', function (event) {
     if (event.button === 2) { // 右键按下
         isLeftClickDisabled = true; // 设置禁用左键点击的标志为 true
         document.addEventListener('mousemove', handleMouseMove); // 监听鼠标移动
-        document.addEventListener('click', handleLeftClick, { capture: true }); // 在捕获阶段监听左键点击
+        document.addEventListener('click', handleLeftClick, {capture: true}); // 在捕获阶段监听左键点击
     }
 });
 
-
-document.addEventListener('mouseup', function(event) {
+document.addEventListener('mouseup', function (event) {
     if (event.button === 2) { // 右键松开
         isLeftClickDisabled = false; // 设置禁用左键点击的标志为 false
         document.removeEventListener('mousemove', handleMouseMove); // 移除鼠标移动监听
-        document.removeEventListener('click', handleLeftClick, { capture: true }); // 移除左键点击监听
+        document.removeEventListener('click', handleLeftClick, {capture: true}); // 移除左键点击监听
         if (lastElement) {
             lastElement.style.border = ''; // 清除边框
             lastElement = null;
         }
     }
 });
-document.addEventListener('contextmenu', function(event) {
+
+document.addEventListener('contextmenu', function (event) {
     event.preventDefault(); // 阻止默认的右键菜单
 });
 
@@ -40,15 +41,43 @@ function handleLeftClick(event) {
     if (isLeftClickDisabled) {
         event.preventDefault(); // 阻止左键点击的默认操作
         event.stopPropagation(); // 阻止事件冒泡
-        // 执行您需要的操作
         if (lastElement) {
-            const innerText = lastElement.innerText; // 获取选中元素的内嵌文本
-            console.log(innerText); // 打印内嵌文本
-            lastElement.style.color = 'green'; // 将选中元素的文字颜色设置为绿色
-            const innerElements = lastElement.getElementsByTagName('*'); // 获取选中元素内部的所有元素
-            for (let i = 0; i < innerElements.length; i++) {
-                innerElements[i].style.color = 'green'; // 将每个内部元素的文字颜色设置为绿色
+            const text = lastElement.textContent; // 获取元素的内嵌文本
+            const path = getElementPath(lastElement); // 获取元素的唯一路径
+            if (selectedElement.has(path)) {
+                // 如果哈希表中已经存在该元素,则从哈希表中删除,并取消绿色背景和边距
+                selectedElement.delete(path);
+                lastElement.style.backgroundColor = '';
+                lastElement.style.padding = '';
+            } else {
+                // 如果哈希表中不存在该元素,则加入哈希表,并设置绿色背景和边距
+                selectedElement.set(path, text);
+                lastElement.style.backgroundColor = 'SeaGreen';
+                lastElement.style.padding = '50px'; // 添加内边距,增加元素间距
             }
+            console.log(selectedElement);
         }
     }
+}
+
+/**
+ * 获取元素的唯一路径
+ * @param {Element} element - 目标元素
+ * @returns {string} - 元素的唯一路径
+ */
+function getElementPath(element) {
+    const path = [];
+    while (element.parentNode) {
+        let siblingIndex = 1;
+        let sibling = element;
+        while (sibling.previousSibling) {
+            sibling = sibling.previousSibling;
+            if (sibling.nodeType === 1 && sibling.nodeName === element.nodeName) {
+                siblingIndex++;
+            }
+        }
+        path.unshift(element.nodeName.toLowerCase() + (siblingIndex > 1 ? siblingIndex : ''));
+        element = element.parentNode;
+    }
+    return path.join('>');
 }

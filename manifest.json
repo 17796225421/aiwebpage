@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "aiwebpage",
+  "version": "1.0",
+  "description": "用ai辅助理解网页",
+  "action": {
+  },
+  "permissions": [
+    "storage",
+    "windows",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}

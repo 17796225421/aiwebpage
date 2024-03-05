@@ -16,6 +16,10 @@ document.addEventListener('mouseup', function(event) {
     }
 });
 
+document.addEventListener('contextmenu', function(event) {
+    event.preventDefault(); // 阻止默认的右键菜单
+});
+
 function handleMouseMove(event) {
     const element = document.elementFromPoint(event.clientX, event.clientY); // 获取鼠标指向的元素
     if (element !== lastElement) { // 与上一次元素不同

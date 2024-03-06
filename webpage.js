@@ -18,7 +18,7 @@ function createFloatingWindow() {
     floatingWindow.style.zIndex = '9999';
     floatingWindow.style.background = 'white';
     floatingWindow.style.border = '1px solid black';
-    floatingWindow.style.padding = '10px';
+    floatingWindow.style.padding = '7px';
     floatingWindow.style.display = 'none'; // 初始状态下隐藏悬浮窗
     document.body.appendChild(floatingWindow);
 }
@@ -247,8 +247,8 @@ function extractChildText() {
         topLeft.style.top = mainRect.top + part.startY + 'px';
         topLeft.style.width = '0';
         topLeft.style.height = '0';
-        topLeft.style.borderBottom = '10px solid transparent';
-        topLeft.style.borderLeft = '10px solid royalblue';
+        topLeft.style.borderBottom = '7px solid transparent';
+        topLeft.style.borderLeft = '7px solid royalblue';
         topLeft.style.zIndex = '9999';
         topLeft.style.display = 'none';
 
@@ -257,8 +257,8 @@ function extractChildText() {
         topRight.style.top = mainRect.top + part.startY + 'px';
         topRight.style.width = '0';
         topRight.style.height = '0';
-        topRight.style.borderBottom = '10px solid transparent';
-        topRight.style.borderRight = '10px solid royalblue';
+        topRight.style.borderBottom = '7px solid transparent';
+        topRight.style.borderRight = '7px solid royalblue';
         topRight.style.zIndex = '9999';
         topRight.style.display = 'none';
 
@@ -267,8 +267,8 @@ function extractChildText() {
         bottomLeft.style.top = mainRect.top + part.endY - 10 + 'px';
         bottomLeft.style.width = '0';
         bottomLeft.style.height = '0';
-        bottomLeft.style.borderTop = '10px solid transparent';
-        bottomLeft.style.borderLeft = '10px solid royalblue';
+        bottomLeft.style.borderTop = '7px solid transparent';
+        bottomLeft.style.borderLeft = '7px solid royalblue';
         bottomLeft.style.zIndex = '9999';
         bottomLeft.style.display = 'none';
 
@@ -277,8 +277,8 @@ function extractChildText() {
         bottomRight.style.top = mainRect.top + part.endY - 10 + 'px';
         bottomRight.style.width = '0';
         bottomRight.style.height = '0';
-        bottomRight.style.borderTop = '10px solid transparent';
-        bottomRight.style.borderRight = '10px solid royalblue';
+        bottomRight.style.borderTop = '7px solid transparent';
+        bottomRight.style.borderRight = '7px solid royalblue';
         bottomRight.style.zIndex = '9999';
         bottomRight.style.display = 'none';
 

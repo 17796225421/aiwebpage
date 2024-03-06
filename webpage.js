@@ -30,8 +30,22 @@ function updateFloatingWindow(part) {
 
         // 设置悬浮窗的位置,使其显示在 part 左下角
         let rect = mainElement.getBoundingClientRect();
-        floatingWindow.style.left = rect.left + 'px';
-        floatingWindow.style.top = rect.top + part.endY + 'px';
+        let floatingWindowRect = floatingWindow.getBoundingClientRect();
+
+        // 计算悬浮窗的左边距
+        let left = rect.left;
+
+        // 计算悬浮窗的上边距
+        let top = rect.top + part.endY;
+
+        // 检查悬浮窗是否会超出屏幕底部
+        if (top + floatingWindowRect.height > window.innerHeight) {
+            // 如果悬浮窗超出屏幕底部,将其贴着屏幕底部显示
+            top = window.innerHeight - floatingWindowRect.height;
+        }
+
+        floatingWindow.style.left = left + 'px';
+        floatingWindow.style.top = top + 'px';
 
         floatingWindow.style.display = 'block'; // 显示悬浮窗
     } else {

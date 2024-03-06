@@ -28,13 +28,10 @@ function updateFloatingWindow(part) {
     if (part) {
         floatingWindow.innerText = part.gptPart;
 
-        // 获取 part 对应的 bottomLeft 角落 div 的位置
-        let bottomLeft = part.cornerDivs[2];
-        let rect = bottomLeft.getBoundingClientRect();
-
         // 设置悬浮窗的位置,使其显示在 part 左下角
+        let rect = mainElement.getBoundingClientRect();
         floatingWindow.style.left = rect.left + 'px';
-        floatingWindow.style.top = rect.bottom + 'px';
+        floatingWindow.style.top = rect.top + part.endY + 'px';
 
         floatingWindow.style.display = 'block'; // 显示悬浮窗
     } else {
@@ -42,27 +39,30 @@ function updateFloatingWindow(part) {
     }
 }
 
-// 查找鼠标当前覆盖的 part
+// 查找鼠标当前覆盖的part
 function findCurrentPart(mouseX, mouseY) {
     console.log(mouseY);
-    // 获取 mainElement 的位置和大小
+
     let rect = mainElement.getBoundingClientRect();
 
-    // 判断鼠标是否在 mainElement 的区域内
+    // 判断鼠标是否在mainElement的区域内
     if (mouseX < rect.left || mouseX > rect.right) {
-        // 如果鼠标在横轴方向不在 mainElement 区域内,直接返回 null
+        // 如果鼠标在横轴方向不在mainElement区域内,直接返回null
         return null;
     }
 
-    // 遍历 parts 数组,查找鼠标当前覆盖的 part
+    // 将鼠标的绝对坐标转换为相对于mainElement的坐标
+    let relativeY = mouseY - rect.top;
+
+    // 遍历parts数组,查找鼠标当前覆盖的part
     for (let part of parts) {
-        if (mouseY >= part.startY && mouseY <= part.endY) {
-            // 如果鼠标在纵轴方向覆盖了当前 part,则返回该 part
+        if (relativeY >= part.startY && relativeY <= part.endY) {
+            // 如果鼠标在纵轴方向覆盖了当前part,则返回该part
             return part;
         }
     }
 
-    // 如果没有找到覆盖的 part,返回 null
+    // 如果没有找到覆盖的part,返回null
     return null;
 }
 
@@ -70,12 +70,11 @@ let currentPart = null; // 记录当前鼠标所在的 part
 // 监听 mousemove 事件
 document.addEventListener('mousemove', function (event) {
     if (showFloatingWindow) {
-        let mouseX = event.clientX;
-        let mouseY = event.clientY + window.pageYOffset - (mainElement.getBoundingClientRect().top + window.pageYOffset);
-        currentPart = findCurrentPart(mouseX, mouseY);
+        currentPart = findCurrentPart(event.clientX, event.clientY);
         updateFloatingWindow(currentPart); // 更新悬浮窗的内容和位置
     }
 });
+
 
 // 定义一个函数,用于显示或隐藏所有 part 的绿色拐角
 function togglePartCorners() {
@@ -159,6 +158,10 @@ function findMainContent() {
     }
 
     mainElement = tmpMainElement;
+
+    // 用红框标出主要元素
+    mainElement.style.border = "1px solid red";
+
 }
 
 function extractChildText() {
@@ -182,9 +185,6 @@ function extractChildText() {
         }
     }
 
-    // 获取 mainElement 相对于文档顶部的纵坐标
-    let mainTop = mainElement.getBoundingClientRect().top + window.pageYOffset;
-
     // 遍历mainElement的直接子元素
     let currentPart = null; // 当前正在合并的part
     for (let child of mainElement.children) {
@@ -200,76 +200,75 @@ function extractChildText() {
         if (text !== '') {
             // 如果当前没有正在合并的part,或者合并后的文本长度大于等于250,则创建新的part
             if (!currentPart || (currentPart.text + text).length >= 250) {
+                let rect = child.getBoundingClientRect();
                 currentPart = {
                     text: text,
                     gptPart: null, // 初始化gptPart为null
-                    startY: child.getBoundingClientRect().top + window.pageYOffset - mainTop, // 记录子元素相对于 mainElement 的起始纵坐标
-                    endY: child.getBoundingClientRect().top + window.pageYOffset - mainTop + child.offsetHeight // 记录子元素相对于 mainElement 的结束纵坐标
+                    startY: rect.top - mainElement.getBoundingClientRect().top,
+                    endY: rect.bottom - mainElement.getBoundingClientRect().top
                 };
                 parts.push(currentPart);
             } else {
                 // 否则,将文本合并到当前的part
                 currentPart.text += text;
-                currentPart.endY = child.offsetTop - mainTop + child.offsetHeight; // 更新结束纵坐标
+                currentPart.endY = child.getBoundingClientRect().bottom - mainElement.getBoundingClientRect().top;
             }
         }
     }
-
     // 根据 parts 数组,在 mainElement 上创建标识各个 part 的 div 元素,但先不显示
     for (let i = 0; i < parts.length; i++) {
         let part = parts[i];
 
-        // 创建四个 div 元素,分别用于标识 part 的四个角落
+        // 创建四个 div 元素,分别用于标识 part 的四个拐角
         let topLeft = document.createElement('div');
         let topRight = document.createElement('div');
         let bottomLeft = document.createElement('div');
         let bottomRight = document.createElement('div');
 
-        // 设置四个角落 div 的共同样式
-        let cornerStyle = {
-            position: 'absolute',
-            width: '20px',
-            height: '20px',
-            border: '2px solid green',
-            display: 'none' // 先不显示
-        };
+        // 设置四个拐角div的样式
+        topLeft.style.position = 'absolute';
+        topLeft.style.left = '0';
+        topLeft.style.top = part.startY + 'px';
+        topLeft.style.width = '0';
+        topLeft.style.height = '0';
+        topLeft.style.borderBottom = '10px solid transparent'; // 修改为向下的三角形
+        topLeft.style.borderLeft = '10px solid green';
+        topLeft.style.display = 'none'; // 初始状态下隐藏
 
-        // 设置每个角落 div 的特定样式和位置
-        Object.assign(topLeft.style, cornerStyle, {
-            left: '0',
-            top: part.startY + 'px',
-            borderRight: 'none',
-            borderBottom: 'none'
-        });
+        topRight.style.position = 'absolute';
+        topRight.style.right = '0';
+        topRight.style.top = part.startY + 'px';
+        topRight.style.width = '0';
+        topRight.style.height = '0';
+        topRight.style.borderBottom = '10px solid transparent'; // 修改为向下的三角形
+        topRight.style.borderRight = '10px solid green';
+        topRight.style.display = 'none'; // 初始状态下隐藏
 
-        Object.assign(topRight.style, cornerStyle, {
-            right: '0',
-            top: part.startY + 'px',
-            borderLeft: 'none',
-            borderBottom: 'none'
-        });
+        bottomLeft.style.position = 'absolute';
+        bottomLeft.style.left = '0';
+        bottomLeft.style.top = part.endY - 10 + 'px';
+        bottomLeft.style.width = '0';
+        bottomLeft.style.height = '0';
+        bottomLeft.style.borderTop = '10px solid transparent'; // 修改为向上的三角形
+        bottomLeft.style.borderLeft = '10px solid green';
+        bottomLeft.style.display = 'none'; // 初始状态下隐藏
 
-        Object.assign(bottomLeft.style, cornerStyle, {
-            left: '0',
-            top: (part.endY - 20) + 'px',
-            borderRight: 'none',
-            borderTop: 'none'
-        });
+        bottomRight.style.position = 'absolute';
+        bottomRight.style.right = '0';
+        bottomRight.style.top = part.endY - 10 + 'px';
+        bottomRight.style.width = '0';
+        bottomRight.style.height = '0';
+        bottomRight.style.borderTop = '10px solid transparent'; // 修改为向上的三角形
+        bottomRight.style.borderRight = '10px solid green';
+        bottomRight.style.display = 'none'; // 初始状态下隐藏
 
-        Object.assign(bottomRight.style, cornerStyle, {
-            right: '0',
-            top: (part.endY - 20) + 'px',
-            borderLeft: 'none',
-            borderTop: 'none'
-        });
-
-        // 将四个角落 div 添加到 mainElement 中
+        // 将四个拐角 div 添加到 mainElement 中
         mainElement.appendChild(topLeft);
         mainElement.appendChild(topRight);
         mainElement.appendChild(bottomLeft);
         mainElement.appendChild(bottomRight);
 
-        // 将四个角落 div 存储到 part 对象中,以便后续显示
+        // 将四个拐角 div 存储到 part 对象中,以便后续显示
         part.cornerDivs = [topLeft, topRight, bottomLeft, bottomRight];
     }
 }
@@ -316,7 +315,7 @@ async function analyzePart(part) {
 
 
 // 定义一个start函数,用于在注入脚本后立即执行
-async function start() {
+window.onload = async function () {
     findMainContent();
 
     extractChildText();
@@ -327,6 +326,3 @@ async function start() {
     await Promise.all(parts.map(analyzePart));
 
 }
-
-// 调用start函数
-start();

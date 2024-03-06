@@ -1,6 +1,5 @@
 let mainElement = null;// 主要内容对应的元素
 let parts = []; // 定义一个数组,用于存储mainElement直接子元素的内嵌文本和对应的gptPart
-
 function findMainContent() {
     // 获取所有元素
     let elements = [document.body];
@@ -74,9 +73,6 @@ function findMainContent() {
     }
 
     mainElement = tmpMainElement;
-
-    // 用红框标出主要元素
-    mainElement.style.border = "1px solid red";
 }
 
 function extractChildText() {
@@ -129,16 +125,8 @@ function extractChildText() {
             }
         }
     }
-    parts.push(currentPart);
 
-    // 移除之前的 part 样式
-    mainElement.style.border = '';
-    let existingDivs = mainElement.querySelectorAll('.part-div');
-    for (let div of existingDivs) {
-        div.remove();
-    }
-
-    // 根据 parts 数组,在 mainElement 上标出各个 part
+    // 根据 parts 数组,在 mainElement 上创建标识各个 part 的 div 元素,但先不显示
     for (let i = 0; i < parts.length; i++) {
         let part = parts[i];
 
@@ -153,7 +141,8 @@ function extractChildText() {
             position: 'absolute',
             width: '20px',
             height: '20px',
-            border: '2px solid green'
+            border: '2px solid green',
+            display: 'none' // 先不显示
         };
 
         // 设置每个角落 div 的特定样式和位置
@@ -190,8 +179,12 @@ function extractChildText() {
         mainElement.appendChild(topRight);
         mainElement.appendChild(bottomLeft);
         mainElement.appendChild(bottomRight);
+
+        // 将四个角落 div 存储到 part 对象中,以便后续显示
+        part.cornerDivs = [topLeft, topRight, bottomLeft, bottomRight];
     }
 }
+
 async function analyzePart(part) {
     const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-Uu3jdGcVYyZymoTX63C4Cf38E7A44198982490612d1f48D5';
@@ -226,16 +219,26 @@ async function analyzePart(part) {
 
         const responseData = await response.json();
         part.gptPart = responseData.choices[0].message.content;
-        console.log(part);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
     }
 }
+// 定义一个函数,用于显示或隐藏所有 part 的绿色拐角
+function togglePartCorners() {
+    for (let part of parts) {
+        for (let div of part.cornerDivs) {
+            div.style.display = (div.style.display === 'none' ? 'block' : 'none');
+        }
+    }
+}
+
 // 定义一个start函数,用于在注入脚本后立即执行
 async function start() {
+    // 监听contextmenu事件,当按下右键时,将rightClickPressed设为true
     document.addEventListener('contextmenu', function (event) {
         event.preventDefault(); // 阻止默认的右键菜单
+        togglePartCorners();
     });
 
     findMainContent();
@@ -245,8 +248,6 @@ async function start() {
     // 使用 Promise.all 实现并发调用 analyzePart
     await Promise.all(parts.map(analyzePart));
 
-    // 所有 analyzePart 调用结束后,打印 parts 数组
-    console.log(parts);
 }
 
 // 调用start函数

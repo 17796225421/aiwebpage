@@ -159,9 +159,8 @@ function findMainContent() {
 
     mainElement = tmpMainElement;
 
-    // 用红框标出主要元素
-    mainElement.style.border = "1px solid red";
-
+    // // 用红框标出主要元素
+    // mainElement.style.border = "1px solid red";
 }
 
 function extractChildText() {
@@ -225,48 +224,55 @@ function extractChildText() {
         let bottomLeft = document.createElement('div');
         let bottomRight = document.createElement('div');
 
-        // 设置四个拐角div的样式
+        // 获取 mainElement 的位置信息
+        let mainRect = mainElement.getBoundingClientRect();
+
+        // 设置四个拐角div的样式,使用绝对定位
         topLeft.style.position = 'absolute';
-        topLeft.style.left = '0';
-        topLeft.style.top = part.startY + 'px';
+        topLeft.style.left = mainRect.left + 'px';
+        topLeft.style.top = mainRect.top + part.startY + 'px';
         topLeft.style.width = '0';
         topLeft.style.height = '0';
-        topLeft.style.borderBottom = '10px solid transparent'; // 修改为向下的三角形
+        topLeft.style.borderBottom = '10px solid transparent';
         topLeft.style.borderLeft = '10px solid green';
-        topLeft.style.display = 'none'; // 初始状态下隐藏
+        topLeft.style.zIndex = '9999';
+        topLeft.style.display = 'none';
 
         topRight.style.position = 'absolute';
-        topRight.style.right = '0';
-        topRight.style.top = part.startY + 'px';
+        topRight.style.left = mainRect.right - 10 + 'px';
+        topRight.style.top = mainRect.top + part.startY + 'px';
         topRight.style.width = '0';
         topRight.style.height = '0';
-        topRight.style.borderBottom = '10px solid transparent'; // 修改为向下的三角形
+        topRight.style.borderBottom = '10px solid transparent';
         topRight.style.borderRight = '10px solid green';
-        topRight.style.display = 'none'; // 初始状态下隐藏
+        topRight.style.zIndex = '9999';
+        topRight.style.display = 'none';
 
         bottomLeft.style.position = 'absolute';
-        bottomLeft.style.left = '0';
-        bottomLeft.style.top = part.endY - 10 + 'px';
+        bottomLeft.style.left = mainRect.left + 'px';
+        bottomLeft.style.top = mainRect.top + part.endY - 10 + 'px';
         bottomLeft.style.width = '0';
         bottomLeft.style.height = '0';
-        bottomLeft.style.borderTop = '10px solid transparent'; // 修改为向上的三角形
+        bottomLeft.style.borderTop = '10px solid transparent';
         bottomLeft.style.borderLeft = '10px solid green';
-        bottomLeft.style.display = 'none'; // 初始状态下隐藏
+        bottomLeft.style.zIndex = '9999';
+        bottomLeft.style.display = 'none';
 
         bottomRight.style.position = 'absolute';
-        bottomRight.style.right = '0';
-        bottomRight.style.top = part.endY - 10 + 'px';
+        bottomRight.style.left = mainRect.right - 10 + 'px';
+        bottomRight.style.top = mainRect.top + part.endY - 10 + 'px';
         bottomRight.style.width = '0';
         bottomRight.style.height = '0';
-        bottomRight.style.borderTop = '10px solid transparent'; // 修改为向上的三角形
+        bottomRight.style.borderTop = '10px solid transparent';
         bottomRight.style.borderRight = '10px solid green';
-        bottomRight.style.display = 'none'; // 初始状态下隐藏
+        bottomRight.style.zIndex = '9999';
+        bottomRight.style.display = 'none';
 
-        // 将四个拐角 div 添加到 mainElement 中
-        mainElement.appendChild(topLeft);
-        mainElement.appendChild(topRight);
-        mainElement.appendChild(bottomLeft);
-        mainElement.appendChild(bottomRight);
+        // 将四个拐角 div 添加到 document.body 中,而不是 mainElement
+        document.body.appendChild(topLeft);
+        document.body.appendChild(topRight);
+        document.body.appendChild(bottomLeft);
+        document.body.appendChild(bottomRight);
 
         // 将四个拐角 div 存储到 part 对象中,以便后续显示
         part.cornerDivs = [topLeft, topRight, bottomLeft, bottomRight];

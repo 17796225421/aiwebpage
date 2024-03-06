@@ -1,5 +1,77 @@
 let mainElement = null;// 主要内容对应的元素
 let parts = []; // 定义一个数组,用于存储mainElement直接子元素的内嵌文本和对应的gptPart
+
+let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
+let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
+
+// 监听contextmenu事件
+document.addEventListener('contextmenu', function (event) {
+    event.preventDefault(); // 阻止默认的右键菜单
+    togglePartCorners();
+    showFloatingWindow = !showFloatingWindow; // 切换悬浮窗的显示状态
+});
+
+// 创建悬浮窗元素
+function createFloatingWindow() {
+    floatingWindow = document.createElement('div');
+    floatingWindow.style.position = 'fixed';
+    floatingWindow.style.zIndex = '9999';
+    floatingWindow.style.background = 'white';
+    floatingWindow.style.border = '1px solid black';
+    floatingWindow.style.padding = '10px';
+    floatingWindow.style.display = 'none'; // 初始状态下隐藏悬浮窗
+    document.body.appendChild(floatingWindow);
+}
+
+// 更新悬浮窗的内容和位置
+function updateFloatingWindow(part) {
+    if (part) {
+        floatingWindow.innerText = part.gptPart;
+        // 设置悬浮窗的位置,使其显示在 part 上方
+        let rect = part.cornerDivs[0].getBoundingClientRect();
+        floatingWindow.style.left = rect.left + 'px';
+        floatingWindow.style.top = (rect.top - floatingWindow.offsetHeight - 10) + 'px';
+        floatingWindow.style.display = 'block'; // 显示悬浮窗
+    } else {
+        floatingWindow.style.display = 'none'; // 隐藏悬浮窗
+    }
+}
+// 查找鼠标当前覆盖的 part
+function findCurrentPart(mouseY) {
+    for (let part of parts) {
+        if (mouseY >= part.startY && mouseY <= part.endY) {
+            return part;
+        }
+    }
+    return null;
+}
+
+let currentPart = null; // 记录当前鼠标所在的 part
+// 监听 mousemove 事件
+document.addEventListener('mousemove', function (event) {
+    if (showFloatingWindow) {
+        let mouseY = window.pageYOffset + event.clientY; // 计算鼠标在页面中的绝对位置
+        currentPart = findCurrentPart(mouseY); // 查找鼠标当前覆盖的 part,并记录下来
+        updateFloatingWindow(currentPart); // 更新悬浮窗的内容和位置
+    }
+});
+
+// 监听 scroll 事件
+window.addEventListener('scroll', function () {
+    if (showFloatingWindow && currentPart) {
+        updateFloatingWindow(currentPart); // 根据之前记录的 currentPart 来更新悬浮窗位置
+    }
+});
+
+// 定义一个函数,用于显示或隐藏所有 part 的绿色拐角
+function togglePartCorners() {
+    for (let part of parts) {
+        for (let div of part.cornerDivs) {
+            div.style.display = (div.style.display === 'none' ? 'block' : 'none');
+        }
+    }
+}
+
 function findMainContent() {
     // 获取所有元素
     let elements = [document.body];
@@ -224,26 +296,15 @@ async function analyzePart(part) {
         // 这里可以根据需要进行错误处理,例如重试或提示用户
     }
 }
-// 定义一个函数,用于显示或隐藏所有 part 的绿色拐角
-function togglePartCorners() {
-    for (let part of parts) {
-        for (let div of part.cornerDivs) {
-            div.style.display = (div.style.display === 'none' ? 'block' : 'none');
-        }
-    }
-}
+
 
 // 定义一个start函数,用于在注入脚本后立即执行
 async function start() {
-    // 监听contextmenu事件,当按下右键时,将rightClickPressed设为true
-    document.addEventListener('contextmenu', function (event) {
-        event.preventDefault(); // 阻止默认的右键菜单
-        togglePartCorners();
-    });
-
     findMainContent();
 
     extractChildText();
+
+    createFloatingWindow(); // 创建悬浮窗元素
 
     // 使用 Promise.all 实现并发调用 analyzePart
     await Promise.all(parts.map(analyzePart));

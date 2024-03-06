@@ -12,11 +12,11 @@ function findMainContent() {
         let element = elements.shift();
 
         // 如果元素宽度低于30%,跳过该元素及其子元素
-        if (element.offsetWidth / window.innerWidth < 0.3) {
+        if (element.offsetWidth / window.innerWidth < 0.5) {
             continue;
         }
         // 如果元素高度低于30%,跳过该元素及其子元素
-        if (element.offsetHeight / window.innerHeight < 0.3) {
+        if (element.offsetHeight / window.innerHeight < 0.5) {
             continue;
         }
 
@@ -86,6 +86,7 @@ function start() {
         event.preventDefault(); // 阻止默认的右键菜单
     });
 
+    findMainContent();
     // 每5秒调用一次findMainContent函数
     setInterval(findMainContent, 5000);
 }

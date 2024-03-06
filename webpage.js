@@ -27,17 +27,24 @@ function createFloatingWindow() {
 function updateFloatingWindow(part) {
     if (part) {
         floatingWindow.innerText = part.gptPart;
-        // 设置悬浮窗的位置,使其显示在 part 上方
-        let rect = part.cornerDivs[0].getBoundingClientRect();
+
+        // 获取 part 对应的 bottomLeft 角落 div 的位置
+        let bottomLeft = part.cornerDivs[2];
+        let rect = bottomLeft.getBoundingClientRect();
+
+        // 设置悬浮窗的位置,使其显示在 part 左下角
         floatingWindow.style.left = rect.left + 'px';
-        floatingWindow.style.top = (rect.top - floatingWindow.offsetHeight - 10) + 'px';
+        floatingWindow.style.top = rect.bottom + 'px';
+
         floatingWindow.style.display = 'block'; // 显示悬浮窗
     } else {
         floatingWindow.style.display = 'none'; // 隐藏悬浮窗
     }
 }
+
 // 查找鼠标当前覆盖的 part
 function findCurrentPart(mouseX, mouseY) {
+    console.log(mouseY);
     // 获取 mainElement 的位置和大小
     let rect = mainElement.getBoundingClientRect();
 
@@ -64,16 +71,9 @@ let currentPart = null; // 记录当前鼠标所在的 part
 document.addEventListener('mousemove', function (event) {
     if (showFloatingWindow) {
         let mouseX = event.clientX;
-        let mouseY = window.pageYOffset + event.clientY;
+        let mouseY = event.clientY + window.pageYOffset - (mainElement.getBoundingClientRect().top + window.pageYOffset);
         currentPart = findCurrentPart(mouseX, mouseY);
         updateFloatingWindow(currentPart); // 更新悬浮窗的内容和位置
-    }
-});
-
-// 监听 scroll 事件
-window.addEventListener('scroll', function () {
-    if (showFloatingWindow && currentPart) {
-        updateFloatingWindow(currentPart); // 根据之前记录的 currentPart 来更新悬浮窗位置
     }
 });
 
@@ -182,6 +182,9 @@ function extractChildText() {
         }
     }
 
+    // 获取 mainElement 相对于文档顶部的纵坐标
+    let mainTop = mainElement.getBoundingClientRect().top + window.pageYOffset;
+
     // 遍历mainElement的直接子元素
     let currentPart = null; // 当前正在合并的part
     for (let child of mainElement.children) {
@@ -200,14 +203,14 @@ function extractChildText() {
                 currentPart = {
                     text: text,
                     gptPart: null, // 初始化gptPart为null
-                    startY: child.offsetTop, // 记录子元素的起始纵坐标
-                    endY: child.offsetTop + child.offsetHeight // 记录子元素的结束纵坐标
+                    startY: child.getBoundingClientRect().top + window.pageYOffset - mainTop, // 记录子元素相对于 mainElement 的起始纵坐标
+                    endY: child.getBoundingClientRect().top + window.pageYOffset - mainTop + child.offsetHeight // 记录子元素相对于 mainElement 的结束纵坐标
                 };
                 parts.push(currentPart);
             } else {
                 // 否则,将文本合并到当前的part
                 currentPart.text += text;
-                currentPart.endY = child.offsetTop + child.offsetHeight; // 更新结束纵坐标
+                currentPart.endY = child.offsetTop - mainTop + child.offsetHeight; // 更新结束纵坐标
             }
         }
     }
@@ -317,7 +320,7 @@ async function start() {
     findMainContent();
 
     extractChildText();
-
+    console.log(parts);
     createFloatingWindow(); // 创建悬浮窗元素
 
     // 使用 Promise.all 实现并发调用 analyzePart

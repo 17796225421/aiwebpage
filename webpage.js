@@ -248,7 +248,7 @@ function extractChildText() {
         topLeft.style.width = '0';
         topLeft.style.height = '0';
         topLeft.style.borderBottom = '10px solid transparent';
-        topLeft.style.borderLeft = '10px solid green';
+        topLeft.style.borderLeft = '10px solid royalblue';
         topLeft.style.zIndex = '9999';
         topLeft.style.display = 'none';
 
@@ -258,7 +258,7 @@ function extractChildText() {
         topRight.style.width = '0';
         topRight.style.height = '0';
         topRight.style.borderBottom = '10px solid transparent';
-        topRight.style.borderRight = '10px solid green';
+        topRight.style.borderRight = '10px solid royalblue';
         topRight.style.zIndex = '9999';
         topRight.style.display = 'none';
 
@@ -268,7 +268,7 @@ function extractChildText() {
         bottomLeft.style.width = '0';
         bottomLeft.style.height = '0';
         bottomLeft.style.borderTop = '10px solid transparent';
-        bottomLeft.style.borderLeft = '10px solid green';
+        bottomLeft.style.borderLeft = '10px solid royalblue';
         bottomLeft.style.zIndex = '9999';
         bottomLeft.style.display = 'none';
 
@@ -278,7 +278,7 @@ function extractChildText() {
         bottomRight.style.width = '0';
         bottomRight.style.height = '0';
         bottomRight.style.borderTop = '10px solid transparent';
-        bottomRight.style.borderRight = '10px solid green';
+        bottomRight.style.borderRight = '10px solid royalblue';
         bottomRight.style.zIndex = '9999';
         bottomRight.style.display = 'none';
 
@@ -327,6 +327,10 @@ async function analyzePart(part) {
 
         const responseData = await response.json();
         part.gptPart = responseData.choices[0].message.content;
+        for (let div of part.cornerDivs) {
+            div.style.borderLeftColor = 'green';
+            div.style.borderRightColor = 'green';
+        }
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户

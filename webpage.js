@@ -1,7 +1,7 @@
-let mainElement = null;
+let mainElement = null;// 主要内容对应的元素
+let parts = []; // 定义一个数组,用于存储mainElement直接子元素的内嵌文本和对应的gptPart
 
 function findMainContent() {
-    console.log("开始查找");
     // 获取所有元素
     let elements = [document.body];
     let maxScore = 0;
@@ -66,7 +66,6 @@ function findMainContent() {
             elements.push(child);
         }
 
-        console.log("得分 " + score);
     }
 
     // 移除之前的红框样式
@@ -80,15 +79,174 @@ function findMainContent() {
     mainElement.style.border = "1px solid red";
 }
 
+function extractChildText() {
+    // 获取众数宽度
+    let widthCounts = {}; // 用于统计每个宽度出现的次数
+    let maxCount = 0; // 记录出现次数最多的宽度的次数
+    let modeWidth = null; // 记录众数宽度
+
+    for (let child of mainElement.children) {
+        if (child.offsetWidth >= 10 && child.offsetHeight >= 10) {
+            if (widthCounts[child.offsetWidth]) {
+                widthCounts[child.offsetWidth]++;
+            } else {
+                widthCounts[child.offsetWidth] = 1;
+            }
+
+            if (widthCounts[child.offsetWidth] > maxCount) {
+                maxCount = widthCounts[child.offsetWidth];
+                modeWidth = child.offsetWidth;
+            }
+        }
+    }
+
+    // 遍历mainElement的直接子元素
+    let currentPart = null; // 当前正在合并的part
+    for (let child of mainElement.children) {
+        // 如果子元素宽度不等于众数宽度,则跳过
+        if (child.offsetWidth !== modeWidth) {
+            continue;
+        }
+
+        // 获取子元素的内嵌文本,并去除首尾空格
+        let text = child.innerText.trim();
+
+        // 如果内嵌文本不为空
+        if (text !== '') {
+            // 如果当前没有正在合并的part,或者合并后的文本长度大于等于250,则创建新的part
+            if (!currentPart || (currentPart.text + text).length >= 250) {
+                currentPart = {
+                    text: text,
+                    gptPart: null, // 初始化gptPart为null
+                    startY: child.offsetTop, // 记录子元素的起始纵坐标
+                    endY: child.offsetTop + child.offsetHeight // 记录子元素的结束纵坐标
+                };
+                parts.push(currentPart);
+            } else {
+                // 否则,将文本合并到当前的part
+                currentPart.text += text;
+                currentPart.endY = child.offsetTop + child.offsetHeight; // 更新结束纵坐标
+            }
+        }
+    }
+    parts.push(currentPart);
+
+    // 移除之前的 part 样式
+    mainElement.style.border = '';
+    let existingDivs = mainElement.querySelectorAll('.part-div');
+    for (let div of existingDivs) {
+        div.remove();
+    }
+
+    // 根据 parts 数组,在 mainElement 上标出各个 part
+    for (let i = 0; i < parts.length; i++) {
+        let part = parts[i];
+
+        // 创建四个 div 元素,分别用于标识 part 的四个角落
+        let topLeft = document.createElement('div');
+        let topRight = document.createElement('div');
+        let bottomLeft = document.createElement('div');
+        let bottomRight = document.createElement('div');
+
+        // 设置四个角落 div 的共同样式
+        let cornerStyle = {
+            position: 'absolute',
+            width: '20px',
+            height: '20px',
+            border: '2px solid green'
+        };
+
+        // 设置每个角落 div 的特定样式和位置
+        Object.assign(topLeft.style, cornerStyle, {
+            left: '0',
+            top: part.startY + 'px',
+            borderRight: 'none',
+            borderBottom: 'none'
+        });
+
+        Object.assign(topRight.style, cornerStyle, {
+            right: '0',
+            top: part.startY + 'px',
+            borderLeft: 'none',
+            borderBottom: 'none'
+        });
+
+        Object.assign(bottomLeft.style, cornerStyle, {
+            left: '0',
+            top: (part.endY - 20) + 'px',
+            borderRight: 'none',
+            borderTop: 'none'
+        });
+
+        Object.assign(bottomRight.style, cornerStyle, {
+            right: '0',
+            top: (part.endY - 20) + 'px',
+            borderLeft: 'none',
+            borderTop: 'none'
+        });
+
+        // 将四个角落 div 添加到 mainElement 中
+        mainElement.appendChild(topLeft);
+        mainElement.appendChild(topRight);
+        mainElement.appendChild(bottomLeft);
+        mainElement.appendChild(bottomRight);
+    }
+}
+async function analyzePart(part) {
+    const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-Uu3jdGcVYyZymoTX63C4Cf38E7A44198982490612d1f48D5';
+    const requestBody = {
+        model: 'gpt-3.5-turbo-0125',
+        stream: false,
+        messages: [
+            {
+                role: 'system',
+                content: '你是一位资深的网页内容分析专家。接下来我会给你一段网页内容的文本,请你对这段文本进行深入分析和总结,告诉我这段文本的核心内容、表达的主旨、涉及的主题、蕴含的情感等,力求让我能够最大程度地理解这段文本所传达的信息。在分析过程中,请结合你的专业知识和经验,深入挖掘文本的内在含义。回答请使用中文。'
+            },
+            {
+                role: 'user',
+                content: part.text
+            }
+        ]
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        part.gptPart = responseData.choices[0].message.content;
+        console.log(part);
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}
 // 定义一个start函数,用于在注入脚本后立即执行
-function start() {
+async function start() {
     document.addEventListener('contextmenu', function (event) {
         event.preventDefault(); // 阻止默认的右键菜单
     });
 
     findMainContent();
-    // 每5秒调用一次findMainContent函数
-    setInterval(findMainContent, 5000);
+
+    extractChildText();
+
+    // 使用 Promise.all 实现并发调用 analyzePart
+    await Promise.all(parts.map(analyzePart));
+
+    // 所有 analyzePart 调用结束后,打印 parts 数组
+    console.log(parts);
 }
 
 // 调用start函数

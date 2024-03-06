@@ -37,12 +37,25 @@ function updateFloatingWindow(part) {
     }
 }
 // 查找鼠标当前覆盖的 part
-function findCurrentPart(mouseY) {
+function findCurrentPart(mouseX, mouseY) {
+    // 获取 mainElement 的位置和大小
+    let rect = mainElement.getBoundingClientRect();
+
+    // 判断鼠标是否在 mainElement 的区域内
+    if (mouseX < rect.left || mouseX > rect.right) {
+        // 如果鼠标在横轴方向不在 mainElement 区域内,直接返回 null
+        return null;
+    }
+
+    // 遍历 parts 数组,查找鼠标当前覆盖的 part
     for (let part of parts) {
         if (mouseY >= part.startY && mouseY <= part.endY) {
+            // 如果鼠标在纵轴方向覆盖了当前 part,则返回该 part
             return part;
         }
     }
+
+    // 如果没有找到覆盖的 part,返回 null
     return null;
 }
 
@@ -50,8 +63,9 @@ let currentPart = null; // 记录当前鼠标所在的 part
 // 监听 mousemove 事件
 document.addEventListener('mousemove', function (event) {
     if (showFloatingWindow) {
-        let mouseY = window.pageYOffset + event.clientY; // 计算鼠标在页面中的绝对位置
-        currentPart = findCurrentPart(mouseY); // 查找鼠标当前覆盖的 part,并记录下来
+        let mouseX = event.clientX;
+        let mouseY = window.pageYOffset + event.clientY;
+        currentPart = findCurrentPart(mouseX, mouseY);
         updateFloatingWindow(currentPart); // 更新悬浮窗的内容和位置
     }
 });

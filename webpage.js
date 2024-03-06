@@ -4,12 +4,30 @@ let parts = []; // 定义一个数组,用于存储mainElement直接子元素的�
 let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
 let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
 
-// 监听contextmenu事件
-document.addEventListener('contextmenu', function (event) {
-    event.preventDefault(); // 阻止默认的右键菜单
-    togglePartCorners();
-    showFloatingWindow = !showFloatingWindow; // 切换悬浮窗的显示状态
-});
+// 定义一个start函数,用于在注入脚本后立即执行
+window.onload = async function () {
+    // 监听contextmenu事件
+    document.addEventListener('contextmenu', function (event) {
+        event.preventDefault(); // 阻止默认的右键菜单
+        togglePartCorners();
+        showFloatingWindow = !showFloatingWindow; // 切换悬浮窗的显示状态
+        if (!showFloatingWindow) {
+            // 如果关闭悬浮窗,则隐藏当前的悬浮窗
+            updateFloatingWindow(null);
+        }
+    });
+
+    findMainContent();
+
+    extractChildText();
+    console.log(parts);
+    createFloatingWindow(); // 创建悬浮窗元素
+
+    // 使用 Promise.all 实现并发调用 analyzePart
+    await Promise.all(parts.map(analyzePart));
+
+}
+
 
 // 创建悬浮窗元素
 function createFloatingWindow() {
@@ -25,7 +43,8 @@ function createFloatingWindow() {
 
 // 更新悬浮窗的内容和位置
 function updateFloatingWindow(part) {
-    if (part) {
+    if (part && showFloatingWindow) {
+        // 如果存在part并且showFloatingWindow为true,则更新悬浮窗内容和位置
         floatingWindow.innerText = part.gptPart;
 
         // 设置悬浮窗的位置,使其显示在 part 左下角
@@ -338,15 +357,3 @@ async function analyzePart(part) {
 }
 
 
-// 定义一个start函数,用于在注入脚本后立即执行
-window.onload = async function () {
-    findMainContent();
-
-    extractChildText();
-    console.log(parts);
-    createFloatingWindow(); // 创建悬浮窗元素
-
-    // 使用 Promise.all 实现并发调用 analyzePart
-    await Promise.all(parts.map(analyzePart));
-
-}

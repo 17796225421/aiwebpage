@@ -49,6 +49,7 @@ function processSelectedText() {
                 }
                 return;
             }
+            removeContextMenu();
             showContextMenu(selectedText, event.clientX, event.clientY);
             // 更新 lastSelection
             lastSelection = selectedText;

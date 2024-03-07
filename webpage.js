@@ -30,32 +30,28 @@ window.onload = async function () {
 }
 
 function processSelectedText() {
-    // 定义一个变量来存储上一次选择的文本
-    let lastSelectedText = '';
-
+    // 定义一个变量,用于存储上一次选择的文本范围
+    let lastSelection = null;
     // 监听鼠标左键松开事件
     document.addEventListener('mouseup', function (event) {
         if (event.button === 0) { // 检查是否为鼠标左键
-            // 删除当前所有的contextMenu元素
-            let contextMenus = document.querySelectorAll('div[data-role="context-menu"]');
-            contextMenus.forEach(menu => menu.remove());
-
             // 获取选中的文本
             let selectedText = window.getSelection().toString().trim();
-
-            // 如果选中的文本与上一次选择的文本相同,说明是再次点击了选中的文本,此时不弹出菜单
-            if (selectedText === lastSelectedText) {
-                lastSelectedText = ''; // 清空上一次选择的文本
+            if (lastSelection && lastSelection === selectedText) {
+                selectedText = '';
+            }
+            if (selectedText === '') {
+                // 如果点击对象不是 contextMenu 或其子元素，则删除 contextMenu
+                if (!event.target.closest('[data-role="context-menu"]')) {
+                    if (contextMenu) {
+                        removeContextMenu();
+                    }
+                }
                 return;
             }
-
-            // 如果选中的文本不为空,弹出菜单
-            if (selectedText !== '') {
-                showContextMenu(selectedText, event.clientX, event.clientY);
-                lastSelectedText = selectedText; // 更新上一次选择的文本
-            } else {
-                lastSelectedText = ''; // 如果选中的文本为空,清空上一次选择的文本
-            }
+            showContextMenu(selectedText, event.clientX, event.clientY);
+            // 更新 lastSelection
+            lastSelection = selectedText;
         }
     });
 }
@@ -93,11 +89,6 @@ function showContextMenu(selectedText, mouseX, mouseY) {
     // 将菜单添加到文档中
     document.body.appendChild(contextMenu);
 
-    // 获取选中文本的位置
-    let selection = window.getSelection();
-    let range = selection.getRangeAt(0);
-    let rect = range.getBoundingClientRect();
-
     // 设置菜单的位置为鼠标当前位置
     contextMenu.style.left = mouseX + 'px';
     contextMenu.style.top = mouseY + 'px';
@@ -107,14 +98,23 @@ function showContextMenu(selectedText, mouseX, mouseY) {
 function explainText(text) {
     console.log('解释文本:', text);
     // 在这里实现解释文本的逻辑
+    removeContextMenu(); // 调用完成后删除contextMenu
 }
 
 // 提问函数
 function askQuestion(text) {
     console.log('提问:', text);
     // 在这里实现提问的逻辑
+    removeContextMenu(); // 调用完成后删除contextMenu
 }
 
+// 删除contextMenu的函数
+function removeContextMenu() {
+    if (contextMenu) {
+        contextMenu.remove(); // 从DOM中删除contextMenu元素
+        contextMenu = null; // 将contextMenu变量设为null
+    }
+}
 
 // 创建悬浮窗元素
 function createFloatingWindow() {

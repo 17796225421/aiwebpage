@@ -1,6 +1,6 @@
 let mainElement = null;// 主要内容对应的元素
 let parts = []; // 定义一个数组,用于存储mainElement直接子元素的内嵌文本和对应的gptPart
-
+let rightClicked = false;
 let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
 let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
 
@@ -9,6 +9,7 @@ window.onload = async function () {
     // 监听contextmenu事件
     document.addEventListener('contextmenu', function (event) {
         event.preventDefault(); // 阻止默认的右键菜单
+        rightClicked = true;
         togglePartCorners();
         showFloatingWindow = !showFloatingWindow; // 切换悬浮窗的显示状态
         if (!showFloatingWindow) {
@@ -313,6 +314,12 @@ function extractChildText() {
 }
 
 async function analyzePart(part) {
+    // 循环判断 rightClicked 是否为 true
+    while (!rightClicked) {
+        // 如果 rightClicked 不为 true,等待 1 秒后再次判断
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
     const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-Uu3jdGcVYyZymoTX63C4Cf38E7A44198982490612d1f48D5';
     const requestBody = {

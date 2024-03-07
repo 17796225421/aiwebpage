@@ -3,6 +3,7 @@ let parts = []; // 定义一个数组,用于存储mainElement直接子元素的�
 let rightClicked = false;
 let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
 let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
+let contextMenu = null;// 定义一个变量,用于存储菜单元素
 
 // 定义一个start函数,用于在注入脚本后立即执行
 window.onload = async function () {
@@ -19,14 +20,99 @@ window.onload = async function () {
     });
 
     findMainContent();
-
+    processSelectedText();
     extractChildText();
-    console.log(parts);
     createFloatingWindow(); // 创建悬浮窗元素
 
     // 使用 Promise.all 实现并发调用 analyzePart
     await Promise.all(parts.map(analyzePart));
 
+}
+
+function processSelectedText() {
+    // 定义一个变量来存储上一次选择的文本
+    let lastSelectedText = '';
+
+    // 监听鼠标左键松开事件
+    document.addEventListener('mouseup', function (event) {
+        if (event.button === 0) { // 检查是否为鼠标左键
+            // 删除当前所有的contextMenu元素
+            let contextMenus = document.querySelectorAll('div[data-role="context-menu"]');
+            contextMenus.forEach(menu => menu.remove());
+
+            // 获取选中的文本
+            let selectedText = window.getSelection().toString().trim();
+
+            // 如果选中的文本与上一次选择的文本相同,说明是再次点击了选中的文本,此时不弹出菜单
+            if (selectedText === lastSelectedText) {
+                lastSelectedText = ''; // 清空上一次选择的文本
+                return;
+            }
+
+            // 如果选中的文本不为空,弹出菜单
+            if (selectedText !== '') {
+                showContextMenu(selectedText, event.clientX, event.clientY);
+                lastSelectedText = selectedText; // 更新上一次选择的文本
+            } else {
+                lastSelectedText = ''; // 如果选中的文本为空,清空上一次选择的文本
+            }
+        }
+    });
+}
+
+// 显示右键菜单
+function showContextMenu(selectedText, mouseX, mouseY) {
+    console.log(selectedText);
+
+    // 创建菜单元素
+    contextMenu = document.createElement('div');
+    contextMenu.setAttribute('data-role', 'context-menu'); // 添加自定义属性,用于标识contextMenu元素
+    contextMenu.style.position = 'absolute';
+    contextMenu.style.background = 'white';
+    contextMenu.style.border = '1px solid black';
+    contextMenu.style.padding = '5px';
+
+    // 创建 "解释" 选项
+    let explainOption = document.createElement('div');
+    explainOption.innerText = '解释';
+    explainOption.style.cursor = 'pointer';
+    explainOption.addEventListener('click', function () {
+        explainText(selectedText);
+    });
+    contextMenu.appendChild(explainOption);
+
+    // 创建 "提问" 选项
+    let askOption = document.createElement('div');
+    askOption.innerText = '提问';
+    askOption.style.cursor = 'pointer';
+    askOption.addEventListener('click', function () {
+        askQuestion(selectedText);
+    });
+    contextMenu.appendChild(askOption);
+
+    // 将菜单添加到文档中
+    document.body.appendChild(contextMenu);
+
+    // 获取选中文本的位置
+    let selection = window.getSelection();
+    let range = selection.getRangeAt(0);
+    let rect = range.getBoundingClientRect();
+
+    // 设置菜单的位置为鼠标当前位置
+    contextMenu.style.left = mouseX + 'px';
+    contextMenu.style.top = mouseY + 'px';
+}
+
+// 解释文本函数
+function explainText(text) {
+    console.log('解释文本:', text);
+    // 在这里实现解释文本的逻辑
+}
+
+// 提问函数
+function askQuestion(text) {
+    console.log('提问:', text);
+    // 在这里实现提问的逻辑
 }
 
 

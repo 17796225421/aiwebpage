@@ -98,48 +98,82 @@ function showContextMenu(selection, mouseX, mouseY) {
 
 // 解释文本函数
 function explainText(range) {
-    console.log('解释文本:', range.toString());
+    // 创建一个固定高度的输出框
+    let outputBox = document.createElement('div');
+    outputBox.style.height = '200px'; // 设置输出框的高度为200像素
+    outputBox.style.width = '100%'; // 设置输出框的宽度为100%
+    outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
+    outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
 
-    // 创建一个新的文本节点,内容为 "111"
-    let newTextNode = document.createTextNode("(111)");
+    // 创建可滚动的左边区域
+    let leftScrollable = document.createElement('div');
+    leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
+    leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
+    leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    // 将新的文本节点插入到选中文本的末尾
-    range.insertNode(newTextNode);
+    let leftArea = document.createElement('div');
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "gpt4"
+    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
 
-    // 将选中区域的起始位置移动到新插入的文本节点之后
-    range.setStartAfter(newTextNode);
+    // 创建可滚动的右边区域
+    let rightScrollable = document.createElement('div');
+    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    // 折叠选中区域,使其起始位置和结束位置相同
-    range.collapse(true);
+    let rightArea = document.createElement('div');
+    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
 
-    // 清空选中区域
-    window.getSelection().removeAllRanges();
+    // 将选中区域的结束位置移动到原来的结束位置
+    range.collapse(false);
+
+    // 将输出框插入到选中文本的末尾
+    range.insertNode(outputBox);
 
     removeContextMenu(); // 删除contextMenu
 }
 
-
 // 提问函数
 function askQuestion(range) {
-    console.log('提问:', range.toString());
+    // 创建一个固定高度的输出框
+    let outputBox = document.createElement('div');
+    outputBox.style.height = '200px'; // 设置输出框的高度为200像素
+    outputBox.style.width = '100%'; // 设置输出框的宽度为100%
+    outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
+    outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
 
-    // 创建一个新的文本节点,内容为 "111"
-    let newTextNode = document.createTextNode("(111)");
+    // 创建可滚动的左边区域
+    let leftScrollable = document.createElement('div');
+    leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
+    leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
+    leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    // 将新的文本节点插入到选中文本的末尾
-    range.insertNode(newTextNode);
+    let leftArea = document.createElement('div');
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "gpt4"
+    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
 
-    // 将选中区域的起始位置移动到新插入的文本节点之后
-    range.setStartAfter(newTextNode);
+    // 创建可滚动的右边区域
+    let rightScrollable = document.createElement('div');
+    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    // 折叠选中区域,使其起始位置和结束位置相同
-    range.collapse(true);
+    let rightArea = document.createElement('div');
+    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
 
-    // 清空选中区域
-    window.getSelection().removeAllRanges();
+    // 将选中区域的结束位置移动到原来的结束位置
+    range.collapse(false);
 
-    // 在这里实现提问的逻辑
-    removeContextMenu(); // 调用完成后删除contextMenu
+    // 将输出框插入到选中文本的末尾
+    range.insertNode(outputBox);
+
+    removeContextMenu(); // 删除contextMenu
 }
 
 // 删除contextMenu的函数

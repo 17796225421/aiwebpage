@@ -90,8 +90,8 @@ function showContextMenu(selectedText, mouseX, mouseY) {
     document.body.appendChild(contextMenu);
 
     // 设置菜单的位置为鼠标当前位置
-    contextMenu.style.left = mouseX + 'px';
-    contextMenu.style.top = mouseY + 'px';
+    contextMenu.style.left = (mouseX + window.scrollX) + 'px';
+    contextMenu.style.top = (mouseY + window.scrollY) + 'px';
 }
 
 // 解释文本函数

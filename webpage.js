@@ -4,7 +4,7 @@ let rightClicked = false;
 let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
 let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
 let contextMenu = null;// 定义一个变量,用于存储菜单元素
-
+let lastSelectedRange = null;// 定义一个变量,用于存储最后一次选中的区域
 // 定义一个start函数,用于在注入脚本后立即执行
 window.onload = async function () {
     // 监听contextmenu事件
@@ -30,18 +30,19 @@ window.onload = async function () {
 }
 
 function processSelectedText() {
-    // 定义一个变量,用于存储上一次选择的文本范围
-    let lastSelection = null;
+    // 定义一个变量,用于存储上一次选择的文本
+    let lastSelectedText = '';
     // 监听鼠标左键松开事件
     document.addEventListener('mouseup', function (event) {
         if (event.button === 0) { // 检查是否为鼠标左键
             // 获取选中的文本
-            let selectedText = window.getSelection().toString().trim();
-            if (lastSelection && lastSelection === selectedText) {
+            let selection = window.getSelection();
+            let selectedText = selection.toString().trim();
+            if (lastSelectedText === selectedText) {
                 selectedText = '';
             }
             if (selectedText === '') {
-                // 如果点击对象不是 contextMenu 或其子元素，则删除 contextMenu
+                // 如果点击对象不是 contextMenu 或其子元素,则删除 contextMenu
                 if (!event.target.closest('[data-role="context-menu"]')) {
                     if (contextMenu) {
                         removeContextMenu();
@@ -50,17 +51,17 @@ function processSelectedText() {
                 return;
             }
             removeContextMenu();
-            showContextMenu(selectedText, event.clientX, event.clientY);
-            // 更新 lastSelection
-            lastSelection = selectedText;
+            showContextMenu(selection, event.clientX, event.clientY);
+            // 更新 lastSelectedText
+            lastSelectedText = selectedText;
+            // 存储最后一次选中的区域
+            lastSelectedRange = selection.getRangeAt(0);
         }
     });
 }
 
 // 显示右键菜单
-function showContextMenu(selectedText, mouseX, mouseY) {
-    console.log(selectedText);
-
+function showContextMenu(selection, mouseX, mouseY) {
     // 创建菜单元素
     contextMenu = document.createElement('div');
     contextMenu.setAttribute('data-role', 'context-menu'); // 添加自定义属性,用于标识contextMenu元素
@@ -74,7 +75,7 @@ function showContextMenu(selectedText, mouseX, mouseY) {
     explainOption.innerText = '解释';
     explainOption.style.cursor = 'pointer';
     explainOption.addEventListener('click', function () {
-        explainText(selectedText);
+        explainText(lastSelectedRange);
     });
     contextMenu.appendChild(explainOption);
 
@@ -83,7 +84,7 @@ function showContextMenu(selectedText, mouseX, mouseY) {
     askOption.innerText = '提问';
     askOption.style.cursor = 'pointer';
     askOption.addEventListener('click', function () {
-        askQuestion(selectedText);
+        askQuestion(lastSelectedRange);
     });
     contextMenu.appendChild(askOption);
 
@@ -96,15 +97,47 @@ function showContextMenu(selectedText, mouseX, mouseY) {
 }
 
 // 解释文本函数
-function explainText(text) {
-    console.log('解释文本:', text);
-    // 在这里实现解释文本的逻辑
-    removeContextMenu(); // 调用完成后删除contextMenu
+function explainText(range) {
+    console.log('解释文本:', range.toString());
+
+    // 创建一个新的文本节点,内容为 "111"
+    let newTextNode = document.createTextNode("(111)");
+
+    // 将新的文本节点插入到选中文本的末尾
+    range.insertNode(newTextNode);
+
+    // 将选中区域的起始位置移动到新插入的文本节点之后
+    range.setStartAfter(newTextNode);
+
+    // 折叠选中区域,使其起始位置和结束位置相同
+    range.collapse(true);
+
+    // 清空选中区域
+    window.getSelection().removeAllRanges();
+
+    removeContextMenu(); // 删除contextMenu
 }
 
+
 // 提问函数
-function askQuestion(text) {
-    console.log('提问:', text);
+function askQuestion(range) {
+    console.log('提问:', range.toString());
+
+    // 创建一个新的文本节点,内容为 "111"
+    let newTextNode = document.createTextNode("(111)");
+
+    // 将新的文本节点插入到选中文本的末尾
+    range.insertNode(newTextNode);
+
+    // 将选中区域的起始位置移动到新插入的文本节点之后
+    range.setStartAfter(newTextNode);
+
+    // 折叠选中区域,使其起始位置和结束位置相同
+    range.collapse(true);
+
+    // 清空选中区域
+    window.getSelection().removeAllRanges();
+
     // 在这里实现提问的逻辑
     removeContextMenu(); // 调用完成后删除contextMenu
 }

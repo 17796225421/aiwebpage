@@ -747,8 +747,6 @@ async function analyzePart(part) {
 }
 
 async function askGpt4(systemContent, userContent, area) {
-    area.innerText = systemContent + userContent;
-    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {
@@ -821,8 +819,6 @@ async function askGpt4(systemContent, userContent, area) {
 }
 
 async function askClaude3(systemContent, userContent, area) {
-    area.innerText = systemContent + userContent;
-    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {
@@ -895,7 +891,6 @@ async function askClaude3(systemContent, userContent, area) {
 }
 
 async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
-    console.log(111);
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     // 构建请求体

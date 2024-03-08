@@ -51,7 +51,7 @@ function processSelectedText() {
                 return;
             }
             removeContextMenu();
-            showContextMenu(selection, event.clientX, event.clientY);
+            showContextMenu(event.clientX, event.clientY);
             // 更新 lastSelectedText
             lastSelectedText = selectedText;
             // 存储最后一次选中的区域
@@ -61,7 +61,7 @@ function processSelectedText() {
 }
 
 // 显示右键菜单
-function showContextMenu(selection, mouseX, mouseY) {
+function showContextMenu(mouseX, mouseY) {
     // 创建菜单元素
     contextMenu = document.createElement('div');
     contextMenu.setAttribute('data-role', 'context-menu'); // 添加自定义属性,用于标识contextMenu元素

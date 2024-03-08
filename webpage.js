@@ -236,33 +236,38 @@ function askQuestion(range) {
     let userContent = range.toString(); // 用户选中的文本
     // 使用正则表达式过滤掉非文本内容
     userContent = userContent.replace(/<img.*?>/g, '').trim();
+    // 使用 prompt 函数获取用户输入的问题
+    let question = prompt("请输入你的问题:");
+    if (question) {
+        // 如果用户输入了问题,将问题添加到 userContent 中
+        userContent += "\n问题: " + question;
+        let leftArea = document.createElement('div');
+        leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
+        leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+        outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+        askGpt4(systemContent, userContent, leftArea);
 
-    let leftArea = document.createElement('div');
-    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
-    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
-    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-    askGpt4(systemContent, userContent, leftArea);
+        // 创建可滚动的右边区域
+        let rightScrollable = document.createElement('div');
+        rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+        rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+        rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+        rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+        rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+        rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    // 创建可滚动的右边区域
-    let rightScrollable = document.createElement('div');
-    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
-    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
-    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
-    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
-    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
-    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+        let rightArea = document.createElement('div');
+        rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+        rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+        outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+        askClaude3(systemContent, userContent, rightArea);
 
-    let rightArea = document.createElement('div');
-    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
-    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
-    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-    askClaude3(systemContent, userContent, rightArea);
+        // 将选中区域的结束位置移动到原来的结束位置
+        range.collapse(false);
 
-    // 将选中区域的结束位置移动到原来的结束位置
-    range.collapse(false);
-
-    // 将输出框插入到选中文本的末尾
-    range.insertNode(outputBox);
+        // 将输出框插入到选中文本的末尾
+        range.insertNode(outputBox);
+    }
 
     removeTextContextMenu(); // 删除contextMenu
 
@@ -350,35 +355,39 @@ function askQuestionWithImage(range) {
     if (range != null) {
         text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
-    const userContent = text;
+    let userContent = text;
+    // 使用 prompt 函数获取用户输入的问题
+    let question = prompt("请输入你的问题:");
+    if (question) {
+        // 如果用户输入了问题,将问题添加到 userContent 中
+        userContent += "\n问题: " + question;
+        let leftArea = document.createElement('div');
+        leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
+        leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+        outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+        askGpt4(systemContent, userContent, leftArea);
 
-    let leftArea = document.createElement('div');
-    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
-    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
-    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-    askGpt4(systemContent, userContent, leftArea);
+        // 创建可滚动的右边区域
+        let rightScrollable = document.createElement('div');
+        rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+        rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+        rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+        rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+        rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+        rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    // 创建可滚动的右边区域
-    let rightScrollable = document.createElement('div');
-    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
-    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
-    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
-    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
-    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
-    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+        let rightArea = document.createElement('div');
+        rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+        rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+        outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+        askClaude3(systemContent, userContent, rightArea);
 
-    let rightArea = document.createElement('div');
-    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
-    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
-    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-    askClaude3(systemContent, userContent, rightArea);
+        // 获取图片元素的父元素
+        let parentElement = imageContextMenu.target.parentElement;
 
-    // 获取图片元素的父元素
-    let parentElement = imageContextMenu.target.parentElement;
-
-    // 在图片元素后面插入输出框
-    parentElement.insertBefore(outputBox, imageContextMenu.target.nextSibling);
-
+        // 在图片元素后面插入输出框
+        parentElement.insertBefore(outputBox, imageContextMenu.target.nextSibling);
+    }
     removeImageContextMenu(); // 删除contextMenu
 
     lastSelectedRange = null;

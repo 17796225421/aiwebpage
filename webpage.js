@@ -105,7 +105,7 @@ function showImageContextMenu(mouseX, mouseY, target) {
         explainOption.innerText = '解释';
         explainOption.style.cursor = 'pointer';
         explainOption.addEventListener('click', function () {
-            explainText(lastSelectedRange);
+            explainImage(lastSelectedRange);
         });
         imageContextMenu.appendChild(explainOption);
 
@@ -114,7 +114,7 @@ function showImageContextMenu(mouseX, mouseY, target) {
         askOption.innerText = '提问';
         askOption.style.cursor = 'pointer';
         askOption.addEventListener('click', function () {
-            askQuestion(lastSelectedRange);
+            askQuestionWithImage(lastSelectedRange);
         });
         imageContextMenu.appendChild(askOption);
 
@@ -202,6 +202,8 @@ function explainText(range) {
     range.insertNode(outputBox);
 
     removeTextContextMenu(); // 删除contextMenu
+
+    lastSelectedRange = null;
 }
 
 // 提问函数
@@ -247,6 +249,112 @@ function askQuestion(range) {
     range.insertNode(outputBox);
 
     removeTextContextMenu(); // 删除contextMenu
+
+    lastSelectedRange = null;
+}
+
+// 解释图像函数
+function explainImage(range) {
+    // 创建一个固定高度的输出框
+    let outputBox = document.createElement('div');
+    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.width = '100%'; // 设置输出框的宽度为100%
+    outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
+    outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+
+    // 创建可滚动的左边区域
+    let leftScrollable = document.createElement('div');
+    leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
+    leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
+    leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+
+    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
+    let text = imageContextMenu.target.src;
+    if (range != null) {
+        text += range.toString().trim();
+    }
+    const userContent = text;
+    console.log(userContent);
+
+    let leftArea = document.createElement('div');
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
+    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+    askGpt4(systemContent, userContent, leftArea);
+
+    // 创建可滚动的右边区域
+    let rightScrollable = document.createElement('div');
+    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+
+    let rightArea = document.createElement('div');
+    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+    askClaude3(systemContent, userContent, rightArea);
+
+    // 获取图片元素的父元素
+    let parentElement = imageContextMenu.target.parentElement;
+
+    // 在图片元素后面插入输出框
+    parentElement.insertBefore(outputBox, imageContextMenu.target.nextSibling);
+
+    removeImageContextMenu(); // 删除contextMenu
+
+    lastSelectedRange = null;
+}
+
+// 提问函数
+function askQuestionWithImage(range) {
+    // 创建一个固定高度的输出框
+    let outputBox = document.createElement('div');
+    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.width = '100%'; // 设置输出框的宽度为100%
+    outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
+    outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+
+    // 创建可滚动的左边区域
+    let leftScrollable = document.createElement('div');
+    leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
+    leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
+    leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+
+    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
+    let text = imageContextMenu.target.src;
+    if (range != null) {
+        text += range.toString().trim();
+    }
+    const userContent = text;
+    console.log(userContent);
+
+    let leftArea = document.createElement('div');
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
+    leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
+    outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+    askGpt4(systemContent, userContent, leftArea);
+
+    // 创建可滚动的右边区域
+    let rightScrollable = document.createElement('div');
+    rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
+    rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
+    rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+
+    let rightArea = document.createElement('div');
+    rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
+    rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
+    outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+    askClaude3(systemContent, userContent, rightArea);
+
+    // 获取图片元素的父元素
+    let parentElement = imageContextMenu.target.parentElement;
+
+    // 在图片元素后面插入输出框
+    parentElement.insertBefore(outputBox, imageContextMenu.target.nextSibling);
+
+    removeImageContextMenu(); // 删除contextMenu
+
+    lastSelectedRange = null;
 }
 
 function removeTextContextMenu() {
@@ -602,6 +710,8 @@ async function analyzePart(part) {
 }
 
 async function askGpt4(systemContent, userContent, area) {
+    area.innerText = userContent;
+    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {
@@ -674,6 +784,8 @@ async function askGpt4(systemContent, userContent, area) {
 }
 
 async function askClaude3(systemContent, userContent, area) {
+    area.innerText = userContent;
+    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {

@@ -177,8 +177,8 @@ function explainText(range) {
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    let userContent = range.toString(); // 用户选中的文本
+    const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
+    let userContent = '详细解释这段文本：' + range.toString(); // 用户选中的文本
     // 使用正则表达式过滤掉非文本内容
     userContent = userContent.replace(/<img.*?>/g, '').trim();
 
@@ -232,8 +232,8 @@ function askQuestion(range) {
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    let userContent = range.toString(); // 用户选中的文本
+    const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
+    let userContent = '问题背景：' + range.toString(); // 用户选中的文本
     // 使用正则表达式过滤掉非文本内容
     userContent = userContent.replace(/<img.*?>/g, '').trim();
     // 使用 prompt 函数获取用户输入的问题
@@ -292,19 +292,18 @@ function explainImage(range) {
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
     let imageUrl = imageContextMenu.target.src;
-    let text = '图片在说什么？';
+    let text = '';
     if (range != null) {
         text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
-    const userContent = text;
-
+    let userContent = text;
+    userContent += '图片在说什么？';
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
     leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
     outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-    askGpt4Vision(systemContent, userContent, leftArea, imageUrl);
+    askGpt4Vision(userContent, leftArea, imageUrl);
 
     // 创建可滚动的右边区域
     let rightScrollable = document.createElement('div');
@@ -319,7 +318,7 @@ function explainImage(range) {
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
     rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
     outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-    askClaude3Vision(systemContent, userContent, rightArea, imageUrl);
+    askClaude3Vision(userContent, rightArea, imageUrl);
 
     // 获取图片元素的父元素
     let parentElement = imageContextMenu.target.parentElement;
@@ -350,7 +349,6 @@ function askQuestionWithImage(range) {
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
-    const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
     let imageUrl = imageContextMenu.target.src;
     let text = '';
     if (range != null) {
@@ -362,11 +360,12 @@ function askQuestionWithImage(range) {
     if (question) {
         // 如果用户输入了问题,将问题添加到 userContent 中
         userContent += "\n问题: " + question;
+        userContent += '根据图片信息回答问题';
         let leftArea = document.createElement('div');
         leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
         leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
         outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-        askGpt4Vision(systemContent, userContent, leftArea, imageUrl);
+        askGpt4Vision(userContent, leftArea, imageUrl);
 
         // 创建可滚动的右边区域
         let rightScrollable = document.createElement('div');
@@ -381,7 +380,7 @@ function askQuestionWithImage(range) {
         rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
         rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
         outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-        askClaude3Vision(systemContent, userContent, rightArea, imageUrl);
+        askClaude3Vision(userContent, rightArea, imageUrl);
 
         // 获取图片元素的父元素
         let parentElement = imageContextMenu.target.parentElement;
@@ -890,9 +889,9 @@ async function askClaude3(systemContent, userContent, area) {
     }
 }
 
-async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
-    const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
-    const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
+async function askGpt4Vision(userContent, area, imageUrl) {
+    const apiUrl = 'https://gpts.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-LzTNvNbkGuITnfvh17AdF8167dCb4413B105E5Dc7f1d276c';
     // 构建请求体
     const requestBody = {
         model: "gpt-4-vision-preview",
@@ -911,7 +910,8 @@ async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
                     }
                 ]
             }
-        ]
+        ],
+        max_tokens: 4096
     };
     console.log(requestBody);
     try {
@@ -954,7 +954,7 @@ async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
                     const content = data.choices[0].delta.content;
                     if (content) {
                         accumlativeContent += content;
-                        // 将累计的响应内容绑定到 area 上
+                        // 将累计的响应内容绑定到 leftArea 上
                         area.innerText = accumlativeContent;
                     }
                 }
@@ -966,7 +966,8 @@ async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
     }
 }
 
-async function askClaude3Vision(systemContent, userContent, area, imageUrl) {
+async function askClaude3Vision(userContent, area, imageUrl) {
+    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
 

@@ -3,7 +3,8 @@ let parts = []; // 定义一个数组,用于存储mainElement直接子元素的�
 let rightClicked = false;
 let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
 let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
-let contextMenu = null;// 定义一个变量,用于存储菜单元素
+let textContextMenu = null;// 定义一个变量,用于存储文本菜单元素
+let imageContextMenu = null;// 定义一个变量,用于存储图像菜单元素
 let lastSelectedRange = null;// 定义一个变量,用于存储最后一次选中的区域
 // 定义一个start函数,用于在注入脚本后立即执行
 window.onload = async function () {
@@ -42,33 +43,95 @@ function processSelectedText() {
                 selectedText = '';
             }
             if (selectedText === '') {
-                // 如果点击对象不是 contextMenu 或其子元素,则删除 contextMenu
+                // 如果点击对象不是 textContextMenu 或其子元素,则删除 textContextMenu
                 if (!event.target.closest('[data-role="context-menu"]')) {
-                    if (contextMenu) {
-                        removeContextMenu();
+                    if (textContextMenu) {
+                        removeTextContextMenu();
                     }
                 }
                 return;
             }
-            removeContextMenu();
-            showContextMenu(event.clientX, event.clientY);
+            removeTextContextMenu();
+            showTextContextMenu(event.clientX, event.clientY);
             // 更新 lastSelectedText
             lastSelectedText = selectedText;
             // 存储最后一次选中的区域
             lastSelectedRange = selection.getRangeAt(0);
         }
     });
+
+    // 监听鼠标移动事件
+    document.addEventListener('mousemove', function (event) {
+        // 如果鼠标移动到图片上
+        if (event.target.tagName === 'IMG') {
+            // 创建并显示上下文菜单
+            showImageContextMenu(event.clientX, event.clientY, event.target);
+        } else {
+            if (!event.target.closest('[data-role="image-context-menu"]')) {
+                removeImageContextMenu();
+            }
+        }
+    });
+}
+
+// 创建并显示上下文菜单的函数
+function showImageContextMenu(mouseX, mouseY, target) {
+    if (imageContextMenu) {
+        if (target !== imageContextMenu.target) {
+            removeImageContextMenu();
+        } else {
+            return;
+        }
+    }
+    // 如果 imageContextMenu 不存在,则创建它
+    if (!imageContextMenu) {
+        imageContextMenu = document.createElement('div');
+        imageContextMenu.target = target;
+        // 给目标图片添加凸起效果
+        target.style.transform = 'scale(1.05)';
+        target.style.transition = 'transform 0.3s';
+        imageContextMenu.setAttribute('data-role', 'image-context-menu');
+        imageContextMenu.style.position = 'absolute';
+        imageContextMenu.style.left = (mouseX + window.scrollX) + 'px';
+        imageContextMenu.style.top = (mouseY + window.scrollY) + 'px';
+        imageContextMenu.style.zIndex = '1000';
+        imageContextMenu.style.backgroundColor = '#fff';
+        imageContextMenu.style.border = '1px solid #ccc';
+        imageContextMenu.style.padding = '10px';
+        imageContextMenu.style.boxShadow = '2px 2px 5px rgba(0,0,0,0.2)';
+
+        // 创建 "解释" 选项
+        let explainOption = document.createElement('div');
+        explainOption.innerText = '解释';
+        explainOption.style.cursor = 'pointer';
+        explainOption.addEventListener('click', function () {
+            explainText(lastSelectedRange);
+        });
+        imageContextMenu.appendChild(explainOption);
+
+        // 创建 "提问" 选项
+        let askOption = document.createElement('div');
+        askOption.innerText = '提问';
+        askOption.style.cursor = 'pointer';
+        askOption.addEventListener('click', function () {
+            askQuestion(lastSelectedRange);
+        });
+        imageContextMenu.appendChild(askOption);
+
+        // 将菜单添加到文档中
+        document.body.appendChild(imageContextMenu);
+    }
 }
 
 // 显示右键菜单
-function showContextMenu(mouseX, mouseY) {
+function showTextContextMenu(mouseX, mouseY) {
     // 创建菜单元素
-    contextMenu = document.createElement('div');
-    contextMenu.setAttribute('data-role', 'context-menu'); // 添加自定义属性,用于标识contextMenu元素
-    contextMenu.style.position = 'absolute';
-    contextMenu.style.background = 'white';
-    contextMenu.style.border = '1px solid black';
-    contextMenu.style.padding = '5px';
+    textContextMenu = document.createElement('div');
+    textContextMenu.setAttribute('data-role', 'context-menu'); // 添加自定义属性,用于标识contextMenu元素
+    textContextMenu.style.position = 'absolute';
+    textContextMenu.style.background = 'white';
+    textContextMenu.style.border = '1px solid black';
+    textContextMenu.style.padding = '5px';
 
     // 创建 "解释" 选项
     let explainOption = document.createElement('div');
@@ -77,7 +140,7 @@ function showContextMenu(mouseX, mouseY) {
     explainOption.addEventListener('click', function () {
         explainText(lastSelectedRange);
     });
-    contextMenu.appendChild(explainOption);
+    textContextMenu.appendChild(explainOption);
 
     // 创建 "提问" 选项
     let askOption = document.createElement('div');
@@ -86,14 +149,14 @@ function showContextMenu(mouseX, mouseY) {
     askOption.addEventListener('click', function () {
         askQuestion(lastSelectedRange);
     });
-    contextMenu.appendChild(askOption);
+    textContextMenu.appendChild(askOption);
 
     // 将菜单添加到文档中
-    document.body.appendChild(contextMenu);
+    document.body.appendChild(textContextMenu);
 
     // 设置菜单的位置为鼠标当前位置
-    contextMenu.style.left = (mouseX + window.scrollX) + 'px';
-    contextMenu.style.top = (mouseY + window.scrollY) + 'px';
+    textContextMenu.style.left = (mouseX + window.scrollX) + 'px';
+    textContextMenu.style.top = (mouseY + window.scrollY) + 'px';
 }
 
 // 解释文本函数
@@ -138,7 +201,7 @@ function explainText(range) {
     // 将输出框插入到选中文本的末尾
     range.insertNode(outputBox);
 
-    removeContextMenu(); // 删除contextMenu
+    removeTextContextMenu(); // 删除contextMenu
 }
 
 // 提问函数
@@ -183,14 +246,25 @@ function askQuestion(range) {
     // 将输出框插入到选中文本的末尾
     range.insertNode(outputBox);
 
-    removeContextMenu(); // 删除contextMenu
+    removeTextContextMenu(); // 删除contextMenu
+}
+
+function removeTextContextMenu() {
+    if (textContextMenu) {
+        textContextMenu.remove(); // 从DOM中删除contextMenu元素
+        textContextMenu = null; // 将contextMenu变量设为null
+    }
 }
 
 // 删除contextMenu的函数
-function removeContextMenu() {
-    if (contextMenu) {
-        contextMenu.remove(); // 从DOM中删除contextMenu元素
-        contextMenu = null; // 将contextMenu变量设为null
+function removeImageContextMenu() {
+    if (imageContextMenu) {
+        // 移除目标图片的凸起效果
+        if (imageContextMenu.target) {
+            imageContextMenu.target.style.transform = 'scale(1)'; // 图片恢复原状
+        }
+        imageContextMenu.remove(); // 从DOM中删除contextMenu元素
+        imageContextMenu = null; // 将contextMenu变量设为null
     }
 }
 
@@ -566,7 +640,7 @@ async function askGpt4(systemContent, userContent, area) {
         let accumlativeContent = 'gpt4\n'; // 用于累计响应内容的变量
 
         while (true) {
-            const { value: chunk, done } = await reader.read();
+            const {value: chunk, done} = await reader.read();
             if (done) {
                 break;
             }
@@ -638,7 +712,7 @@ async function askClaude3(systemContent, userContent, area) {
         let accumlativeContent = 'claude3\n'; // 用于累计响应内容的变量
 
         while (true) {
-            const { value: chunk, done } = await reader.read();
+            const {value: chunk, done} = await reader.read();
             if (done) {
                 break;
             }

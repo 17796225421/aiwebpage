@@ -100,7 +100,7 @@ function showContextMenu(selection, mouseX, mouseY) {
 function explainText(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '200px'; // 设置输出框的高度为200像素
+    outputBox.style.height = '400px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
@@ -111,10 +111,14 @@ function explainText(range) {
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
+    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
+    const userContent = range.toString().trim(); // 用户选中的文本
+
     let leftArea = document.createElement('div');
-    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "gpt4"
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
     leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
     outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+    askGpt4(systemContent, userContent, leftArea);
 
     // 创建可滚动的右边区域
     let rightScrollable = document.createElement('div');
@@ -126,6 +130,7 @@ function explainText(range) {
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
     rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
     outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+    askClaude3(systemContent, userContent, rightArea);
 
     // 将选中区域的结束位置移动到原来的结束位置
     range.collapse(false);
@@ -140,7 +145,7 @@ function explainText(range) {
 function askQuestion(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '200px'; // 设置输出框的高度为200像素
+    outputBox.style.height = '400px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
@@ -151,10 +156,14 @@ function askQuestion(range) {
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
+    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
+    const userContent = range.toString().trim(); // 用户选中的文本
+
     let leftArea = document.createElement('div');
-    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "gpt4"
+    leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
     leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
     outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
+    askGpt4(systemContent, userContent, leftArea);
 
     // 创建可滚动的右边区域
     let rightScrollable = document.createElement('div');
@@ -166,6 +175,7 @@ function askQuestion(range) {
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
     rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
     outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
+    askClaude3(systemContent, userContent, rightArea);
 
     // 将选中区域的结束位置移动到原来的结束位置
     range.collapse(false);
@@ -517,4 +527,146 @@ async function analyzePart(part) {
     }
 }
 
+async function askGpt4(systemContent, userContent, area) {
+    const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
+    const requestBody = {
+        model: 'gpt-4-32k',
+        stream: true, // 启用流式传输
+        messages: [
+            {
+                role: 'system',
+                content: systemContent
+            },
+            {
+                role: 'user',
+                content: userContent
+            }
+        ]
+    };
 
+    console.log(requestBody);
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        // 处理流式传输的数据
+        const reader = response.body.getReader();
+        let accumlativeContent = 'gpt4\n'; // 用于累计响应内容的变量
+
+        while (true) {
+            const { value: chunk, done } = await reader.read();
+            if (done) {
+                break;
+            }
+            const decodedChunk = new TextDecoder("utf-8").decode(chunk);
+            // 将解码后的数据按行分割
+            const lines = decodedChunk.split('\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data:')) {
+                    const jsonStr = line.slice('data:'.length).trim();
+                    if (jsonStr === '[DONE]') {
+                        // 如果收到 [DONE] 标记,表示传输结束,跳出循环
+                        break;
+                    }
+                    // 解析 JSON 数据
+                    const data = JSON.parse(jsonStr);
+                    // 提取 delta 中的 content
+                    const content = data.choices[0].delta.content;
+                    if (content) {
+                        accumlativeContent += content;
+                        // 将累计的响应内容绑定到 leftArea 上
+                        area.innerText = accumlativeContent;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}
+
+async function askClaude3(systemContent, userContent, area) {
+    const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
+    const requestBody = {
+        model: 'claude-3-opus-20240229',
+        stream: true, // 启用流式传输
+        messages: [
+            {
+                role: 'system',
+                content: systemContent
+            },
+            {
+                role: 'user',
+                content: userContent
+            }
+        ]
+    };
+
+    console.log(requestBody);
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        // 处理流式传输的数据
+        const reader = response.body.getReader();
+        let accumlativeContent = 'claude3\n'; // 用于累计响应内容的变量
+
+        while (true) {
+            const { value: chunk, done } = await reader.read();
+            if (done) {
+                break;
+            }
+            const decodedChunk = new TextDecoder("utf-8").decode(chunk);
+            // 将解码后的数据按行分割
+            const lines = decodedChunk.split('\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data:')) {
+                    const jsonStr = line.slice('data:'.length).trim();
+                    if (jsonStr === '[DONE]') {
+                        // 如果收到 [DONE] 标记,表示传输结束,跳出循环
+                        break;
+                    }
+                    // 解析 JSON 数据
+                    const data = JSON.parse(jsonStr);
+                    // 提取 delta 中的 content
+                    const content = data.choices[0].delta.content;
+                    if (content) {
+                        accumlativeContent += content;
+                        // 将累计的响应内容绑定到 leftArea 上
+                        area.innerText = accumlativeContent;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}

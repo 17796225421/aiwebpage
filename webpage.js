@@ -175,7 +175,9 @@ function explainText(range) {
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
     const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    const userContent = range.toString().trim(); // 用户选中的文本
+    let userContent = range.toString(); // 用户选中的文本
+    // 使用正则表达式过滤掉非文本内容
+    userContent = userContent.replace(/<img.*?>/g, '').trim();
 
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
@@ -222,7 +224,9 @@ function askQuestion(range) {
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
     const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    const userContent = range.toString().trim(); // 用户选中的文本
+    let userContent = range.toString(); // 用户选中的文本
+    // 使用正则表达式过滤掉非文本内容
+    userContent = userContent.replace(/<img.*?>/g, '').trim();
 
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
@@ -268,10 +272,10 @@ function explainImage(range) {
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    let text = imageContextMenu.target.src;
+    const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
+    let text = imageContextMenu.target.src + '\n';
     if (range != null) {
-        text += range.toString().trim();
+        text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
     const userContent = text;
     console.log(userContent);
@@ -320,13 +324,12 @@ function askQuestionWithImage(range) {
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
 
-    const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
-    let text = imageContextMenu.target.src;
+    const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
+    let text = imageContextMenu.target.src + '\n';
     if (range != null) {
-        text += range.toString().trim();
+        text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
     const userContent = text;
-    console.log(userContent);
 
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
@@ -710,7 +713,7 @@ async function analyzePart(part) {
 }
 
 async function askGpt4(systemContent, userContent, area) {
-    area.innerText = userContent;
+    area.innerText = systemContent + userContent;
     return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
@@ -784,7 +787,7 @@ async function askGpt4(systemContent, userContent, area) {
 }
 
 async function askClaude3(systemContent, userContent, area) {
-    area.innerText = userContent;
+    area.innerText = systemContent + userContent;
     return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';

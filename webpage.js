@@ -293,18 +293,18 @@ function explainImage(range) {
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
-    let text = imageContextMenu.target.src + '\n';
+    let imageUrl = imageContextMenu.target.src;
+    let text = '图片在说什么？';
     if (range != null) {
         text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
     const userContent = text;
-    console.log(userContent);
 
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
     leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
     outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-    askGpt4(systemContent, userContent, leftArea);
+    askGpt4Vision(systemContent, userContent, leftArea, imageUrl);
 
     // 创建可滚动的右边区域
     let rightScrollable = document.createElement('div');
@@ -319,7 +319,7 @@ function explainImage(range) {
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
     rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
     outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-    askClaude3(systemContent, userContent, rightArea);
+    askClaude3Vision(systemContent, userContent, rightArea, imageUrl);
 
     // 获取图片元素的父元素
     let parentElement = imageContextMenu.target.parentElement;
@@ -351,7 +351,8 @@ function askQuestionWithImage(range) {
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
-    let text = imageContextMenu.target.src + '\n';
+    let imageUrl = imageContextMenu.target.src;
+    let text = '';
     if (range != null) {
         text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
     }
@@ -365,7 +366,7 @@ function askQuestionWithImage(range) {
         leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
         leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
         outputBox.appendChild(leftScrollable); // 将左边可滚动容器添加到输出框中
-        askGpt4(systemContent, userContent, leftArea);
+        askGpt4Vision(systemContent, userContent, leftArea, imageUrl);
 
         // 创建可滚动的右边区域
         let rightScrollable = document.createElement('div');
@@ -380,7 +381,7 @@ function askQuestionWithImage(range) {
         rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
         rightScrollable.appendChild(rightArea); // 将右边区域添加到可滚动容器中
         outputBox.appendChild(rightScrollable); // 将右边可滚动容器添加到输出框中
-        askClaude3(systemContent, userContent, rightArea);
+        askClaude3Vision(systemContent, userContent, rightArea, imageUrl);
 
         // 获取图片元素的父元素
         let parentElement = imageContextMenu.target.parentElement;
@@ -882,6 +883,164 @@ async function askClaude3(systemContent, userContent, area) {
                     if (content) {
                         accumlativeContent += content;
                         // 将累计的响应内容绑定到 leftArea 上
+                        area.innerText = accumlativeContent;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}
+
+async function askGpt4Vision(systemContent, userContent, area, imageUrl) {
+    console.log(111);
+    const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
+    // 构建请求体
+    const requestBody = {
+        model: "gpt-4-vision-preview",
+        stream: true,
+        messages: [
+            {
+                role: "user",
+                content: [
+                    {
+                        type: "text",
+                        text: userContent
+                    },
+                    {
+                        type: "image_url",
+                        image_url: imageUrl
+                    }
+                ]
+            }
+        ]
+    };
+    console.log(requestBody);
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        // 处理流式传输的数据
+        const reader = response.body.getReader();
+        let accumlativeContent = ''; // 用于累计响应内容的变量
+
+        while (true) {
+            const {value: chunk, done} = await reader.read();
+            if (done) {
+                break;
+            }
+            const decodedChunk = new TextDecoder("utf-8").decode(chunk);
+            // 将解码后的数据按行分割
+            const lines = decodedChunk.split('\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data:')) {
+                    const jsonStr = line.slice('data:'.length).trim();
+                    if (jsonStr === '[DONE]') {
+                        // 如果收到 [DONE] 标记,表示传输结束,跳出循环
+                        break;
+                    }
+                    // 解析 JSON 数据
+                    const data = JSON.parse(jsonStr);
+                    // 提取 delta 中的 content
+                    const content = data.choices[0].delta.content;
+                    if (content) {
+                        accumlativeContent += content;
+                        // 将累计的响应内容绑定到 area 上
+                        area.innerText = accumlativeContent;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}
+
+async function askClaude3Vision(systemContent, userContent, area, imageUrl) {
+    const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
+
+    // 构造请求体
+    const requestBody = {
+        model: 'claude-3-opus-20240229',
+        stream: true, // 启用流式传输
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    {"type": "text", "text": "图片在说什么？"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": imageUrl
+                        }
+                    }
+                ]
+            }
+        ],
+        max_tokens: 4000
+    };
+
+    console.log(requestBody);
+
+    try {
+        // 发送请求
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        // 处理流式传输的数据
+        const reader = response.body.getReader();
+        let accumlativeContent = 'claude3\n'; // 用于累计响应内容的变量
+
+        while (true) {
+            // 读取流式数据
+            const {value: chunk, done} = await reader.read();
+            if (done) {
+                break;
+            }
+            const decodedChunk = new TextDecoder("utf-8").decode(chunk);
+            // 将解码后的数据按行分割
+            const lines = decodedChunk.split('\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data:')) {
+                    const jsonStr = line.slice('data:'.length).trim();
+                    if (jsonStr === '[DONE]') {
+                        // 如果收到 [DONE] 标记,表示传输结束,跳出循环
+                        break;
+                    }
+                    // 解析 JSON 数据
+                    const data = JSON.parse(jsonStr);
+                    // 提取 delta 中的 content
+                    const content = data.choices[0].delta.content;
+                    if (content) {
+                        accumlativeContent += content;
+                        // 将累计的响应内容绑定到 area 元素上
                         area.innerText = accumlativeContent;
                     }
                 }

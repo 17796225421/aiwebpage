@@ -173,6 +173,9 @@ function explainText(range) {
     leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
+    leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
     let userContent = range.toString(); // 用户选中的文本
@@ -190,6 +193,9 @@ function explainText(range) {
     rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
     rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
     rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -222,6 +228,9 @@ function askQuestion(range) {
     leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
+    leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "你是一个帮助助手。"; // 系统信息，请根据实际情况修改
     let userContent = range.toString(); // 用户选中的文本
@@ -239,6 +248,9 @@ function askQuestion(range) {
     rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
     rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
     rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -271,6 +283,9 @@ function explainImage(range) {
     leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
+    leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
     let text = imageContextMenu.target.src + '\n';
@@ -291,6 +306,9 @@ function explainImage(range) {
     rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
     rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
     rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -323,6 +341,9 @@ function askQuestionWithImage(range) {
     leftScrollable.style.width = '50%'; // 设置左边区域的宽度为 50%
     leftScrollable.style.height = '100%'; // 设置左边区域的高度为100%
     leftScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
+    leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     const systemContent = "输出图片的完整信息，要求详细、精确、有条理，说中文";
     let text = imageContextMenu.target.src + '\n';
@@ -342,6 +363,9 @@ function askQuestionWithImage(range) {
     rightScrollable.style.width = '50%'; // 设置右边区域的宽度为 50%
     rightScrollable.style.height = '100%'; // 设置右边区域的高度为100%
     rightScrollable.style.overflowY = 'auto'; // 设置垂直滚动条
+    rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
+    rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
+    rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"

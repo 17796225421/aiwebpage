@@ -1056,7 +1056,7 @@ async function generateQuestion(userContent, answer, area) {
         messages: [
             {
                 role: 'system',
-                content: '你是一个擅长生成多个问题的助手，每个问题占一行'
+                content: '你是一个擅长生成多个问题的助手，每个问题占一行，不产生空行'
             },
             {
                 role: 'user',

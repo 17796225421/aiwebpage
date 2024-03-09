@@ -178,7 +178,9 @@ function explainText(range) {
     leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
-    let userContent = '详细解释这段文本：' + range.toString(); // 用户选中的文本
+    let userContent = '';
+    userContent += '大背景：' + mainElement.innerText;
+    userContent += '参考大背景，详细解释这段文本：' + range.toString(); // 用户选中的文本
     // 使用正则表达式过滤掉非文本内容
     userContent = userContent.replace(/<img.*?>/g, '').trim();
 
@@ -241,14 +243,16 @@ function askQuestion(range) {
     leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
-    let userContent = '问题背景：' + range.toString(); // 用户选中的文本
+    let userContent = '';
+    userContent += '大背景：' + mainElement.innerText;
+    userContent += '\n小背景：' + range.toString(); // 用户选中的文本
     // 使用正则表达式过滤掉非文本内容
     userContent = userContent.replace(/<img.*?>/g, '').trim();
     // 使用 prompt 函数获取用户输入的问题
     let question = prompt("请输入你的问题:");
     if (question) {
         // 如果用户输入了问题,将问题添加到 userContent 中
-        userContent += "\n问题: " + question;
+        userContent += "\n简单参考大背景，重点参考小背景，回答问题: " + question;
         let leftArea = document.createElement('div');
         leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
         leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
@@ -309,12 +313,13 @@ function explainImage(range) {
     leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let imageUrl = imageContextMenu.target.src;
-    let text = '';
+    let userContent = '';
+    userContent += '大背景：' + mainElement.innerText;
     if (range != null) {
-        text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
+        userContent += '\n小背景：';
     }
-    let userContent = text;
-    userContent += '图片在说什么？';
+    userContent = userContent.replace(/<img.*?>/g, '').trim();
+    userContent += '简单参考大背景，重点参考小背景，详细分析图片';
     let leftArea = document.createElement('div');
     leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
     leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
@@ -374,17 +379,17 @@ function askQuestionWithImage(range) {
     leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let imageUrl = imageContextMenu.target.src;
-    let text = '';
+    let userContent = '';
+    userContent += '大背景：' + mainElement.innerText;
     if (range != null) {
-        text += '图片上下文信息：' + range.toString().replace(/<img.*?>/g, '').trim()
+        userContent += '小背景：';
     }
-    let userContent = text;
+    userContent = userContent.replace(/<img.*?>/g, '').trim();
     // 使用 prompt 函数获取用户输入的问题
     let question = prompt("请输入你的问题:");
     if (question) {
         // 如果用户输入了问题,将问题添加到 userContent 中
-        userContent += "\n问题: " + question;
-        userContent += '根据图片信息回答问题';
+        userContent += "简单参考大背景，重点参考小背景，重点详细分析图片，回答问题: " + question;
         let leftArea = document.createElement('div');
         leftArea.innerText = 'gpt4'; // 设置左边区域的文本为 "claude4"
         leftScrollable.appendChild(leftArea); // 将左边区域添加到可滚动容器中
@@ -495,6 +500,7 @@ document.addEventListener('mousemove', function (event) {
         });
     }
 });
+
 // 定义一个函数,用于显示或隐藏所有 part 的分割线
 function controlDividersShow() {
     let dividers = document.querySelectorAll('.分割线');
@@ -637,7 +643,7 @@ function extractChildText() {
             divider.className += ` 分割线-${partIndex}`; // 添加具有索引的类名，以区分不同的分割线
             // 设置分割线的样式，使其可见
             divider.style.borderTop = '1px solid #131313'; // 上边框
-            divider.style.borderBottom='1px solid #131313';// 下边框
+            divider.style.borderBottom = '1px solid #131313';// 下边框
             divider.style.display = 'none';
             divider.style.backgroundColor = '#232222'; // 背景色
             divider.style.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.2)'; // 添加阴影效果
@@ -725,6 +731,7 @@ async function analyzePart(divider) {
 }
 
 async function askGpt4(systemContent, userContent, area) {
+    console.log(userContent);
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {
@@ -739,7 +746,8 @@ async function askGpt4(systemContent, userContent, area) {
                 role: 'user',
                 content: userContent
             }
-        ]
+        ],
+        max_tokens: 4096
     };
 
     console.log(requestBody);
@@ -797,6 +805,7 @@ async function askGpt4(systemContent, userContent, area) {
 }
 
 async function askClaude3(systemContent, userContent, area) {
+    console.log(userContent);
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
     const requestBody = {
@@ -811,7 +820,8 @@ async function askClaude3(systemContent, userContent, area) {
                 role: 'user',
                 content: userContent
             }
-        ]
+        ],
+        max_tokens: 4096
     };
 
     console.log(requestBody);
@@ -869,6 +879,7 @@ async function askClaude3(systemContent, userContent, area) {
 }
 
 async function askGpt4Vision(userContent, area, imageUrl) {
+    console.log(userContent);
     const apiUrl = 'https://gpts.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-LzTNvNbkGuITnfvh17AdF8167dCb4413B105E5Dc7f1d276c';
     // 构建请求体
@@ -946,6 +957,7 @@ async function askGpt4Vision(userContent, area, imageUrl) {
 }
 
 async function askClaude3Vision(userContent, area, imageUrl) {
+    console.log(userContent);
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
 
@@ -967,7 +979,7 @@ async function askClaude3Vision(userContent, area, imageUrl) {
                 ]
             }
         ],
-        max_tokens: 4000
+        max_tokens: 4096
     };
 
     console.log(requestBody);

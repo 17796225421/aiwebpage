@@ -158,10 +158,12 @@ function showTextContextMenu(mouseX, mouseY) {
 function explainText(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.height = '200px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+    outputBox.style.fontSize = '12px'; // 设置较小的字号
+    outputBox.style.lineHeight = '1.1'; // 设置行距
 
     // 创建可滚动的左边区域
     let leftScrollable = document.createElement('div');
@@ -171,6 +173,9 @@ function explainText(range) {
     leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    leftScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    leftScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
     let userContent = '详细解释这段文本：' + range.toString(); // 用户选中的文本
@@ -191,6 +196,9 @@ function explainText(range) {
     rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
     rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    rightScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    rightScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    rightScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -213,10 +221,12 @@ function explainText(range) {
 function askQuestion(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.height = '200px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+    outputBox.style.fontSize = '12px'; // 设置较小的字号
+    outputBox.style.lineHeight = '1.1'; // 设置行距
 
     // 创建可滚动的左边区域
     let leftScrollable = document.createElement('div');
@@ -226,6 +236,9 @@ function askQuestion(range) {
     leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    leftScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    leftScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     const systemContent = "you are a helpful assistant"; // 系统信息，请根据实际情况修改
     let userContent = '问题背景：' + range.toString(); // 用户选中的文本
@@ -250,6 +263,9 @@ function askQuestion(range) {
         rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
         rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
         rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+        rightScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+        rightScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+        rightScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
         let rightArea = document.createElement('div');
         rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -273,10 +289,12 @@ function askQuestion(range) {
 function explainImage(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.height = '200px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+    outputBox.style.fontSize = '12px'; // 设置较小的字号
+    outputBox.style.lineHeight = '1.1'; // 设置行距
 
     // 创建可滚动的左边区域
     let leftScrollable = document.createElement('div');
@@ -286,6 +304,9 @@ function explainImage(range) {
     leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    leftScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    leftScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let imageUrl = imageContextMenu.target.src;
     let text = '';
@@ -308,6 +329,9 @@ function explainImage(range) {
     rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
     rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    rightScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    rightScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    rightScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let rightArea = document.createElement('div');
     rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -330,10 +354,12 @@ function explainImage(range) {
 function askQuestionWithImage(range) {
     // 创建一个固定高度的输出框
     let outputBox = document.createElement('div');
-    outputBox.style.height = '400px'; // 设置输出框的高度像素
+    outputBox.style.height = '200px'; // 设置输出框的高度像素
     outputBox.style.width = '100%'; // 设置输出框的宽度为100%
     outputBox.style.display = 'flex'; // 将输出框设置为 flex 容器
     outputBox.style.overflow = 'hidden'; // 防止输出框本身出现滚动条
+    outputBox.style.fontSize = '12px'; // 设置较小的字号
+    outputBox.style.lineHeight = '1.1'; // 设置行距
 
     // 创建可滚动的左边区域
     let leftScrollable = document.createElement('div');
@@ -343,6 +369,9 @@ function askQuestionWithImage(range) {
     leftScrollable.style.borderRight = '1px solid #ddd'; // 给左边区域添加右边框来区分左右两侧
     leftScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
     leftScrollable.style.boxShadow = 'inset -5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+    leftScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+    leftScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+    leftScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
     let imageUrl = imageContextMenu.target.src;
     let text = '';
@@ -370,6 +399,9 @@ function askQuestionWithImage(range) {
         rightScrollable.style.borderLeft = '1px solid #ddd'; // 给右边区域添加左边框来区分左右两侧
         rightScrollable.style.backgroundColor = '#f9f9f9'; // 设置背景颜色以区分周围内容
         rightScrollable.style.boxShadow = 'inset 5px 0px 5px -5px rgba(0,0,0,0.1)'; // 内阴影效果
+        rightScrollable.style.scrollbarWidth = 'none'; // 隐藏滚动条（适用于新版浏览器）
+        rightScrollable.style.webkitOverflowScrolling = 'touch'; // 启用惯性滚动效果
+        rightScrollable.style.webkitScrollbarWidth = 'none'; // 隐藏滚动条
 
         let rightArea = document.createElement('div');
         rightArea.innerText = 'claude3'; // 设置右边区域的文本为 "claude3"
@@ -604,11 +636,11 @@ function extractChildText() {
             divider.className = '分割线'; // 设置类名
             divider.className += ` 分割线-${partIndex}`; // 添加具有索引的类名，以区分不同的分割线
             // 设置分割线的样式，使其可见
-            divider.style.borderTop = '2px solid #ccc'; // 上边框
-            divider.style.padding = '1px'; // 内间距
-            divider.style.margin = '1px 0'; // 外间距
+            divider.style.borderTop = '1px solid #131313'; // 上边框
+            divider.style.borderBottom='1px solid #131313';// 下边框
             divider.style.display = 'none';
-            divider.style.backgroundColor = '#f9f9f9'; // 背景色
+            divider.style.backgroundColor = '#232222'; // 背景色
+            divider.style.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.2)'; // 添加阴影效果
             // 创建并隐藏包含累积文本的成员，不在页面上显示
             // 创建新的DOM元素来存储gptText
             const textElement = document.createElement('div');
@@ -681,7 +713,9 @@ async function analyzePart(divider) {
         gptTextElement.style.display = 'none'; // 隐藏元素，不在页面上显示
         gptTextElement.className = 'gptText'; // 给元素添加一个类名，便于以后的查询
         gptTextElement.innerText = responseData.choices[0].message.content;
-
+        // 修改 gptTextElement 的文本样式
+        gptTextElement.style.fontSize = '12px'; // 设置较小的字号
+        gptTextElement.style.lineHeight = '1.1'; // 设置行距
         // 将新创建的元素添加到分割线元素中
         divider.appendChild(gptTextElement);
     } catch (error) {

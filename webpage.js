@@ -1,8 +1,5 @@
 let mainElement = null;// 主要内容对应的元素
-let parts = []; // 定义一个数组,用于存储mainElement直接子元素的内嵌文本和对应的gptPart
 let rightClicked = false;
-let showFloatingWindow = false;// 定义一个变量,用于控制悬浮窗的显示状态
-let floatingWindow = null;// 定义一个变量,用于存储悬浮窗元素
 let textContextMenu = null;// 定义一个变量,用于存储文本菜单元素
 let imageContextMenu = null;// 定义一个变量,用于存储图像菜单元素
 let lastSelectedRange = null;// 定义一个变量,用于存储最后一次选中的区域
@@ -12,21 +9,19 @@ window.onload = async function () {
     document.addEventListener('contextmenu', function (event) {
         event.preventDefault(); // 阻止默认的右键菜单
         rightClicked = true;
-        togglePartCorners();
-        showFloatingWindow = !showFloatingWindow; // 切换悬浮窗的显示状态
-        if (!showFloatingWindow) {
-            // 如果关闭悬浮窗,则隐藏当前的悬浮窗
-            updateFloatingWindow(null);
-        }
+        controlDividersShow();
+
     });
 
     findMainContent();
     processSelectedText();
     extractChildText();
-    createFloatingWindow(); // 创建悬浮窗元素
 
-    // 使用 Promise.all 实现并发调用 analyzePart
-    await Promise.all(parts.map(analyzePart));
+    // 获取所有分割线元素
+    let dividers = document.querySelectorAll('.分割线');
+
+    // 将分割线元素转为数组,并传入 Promise.all
+    await Promise.all(Array.from(dividers).map(analyzePart));
 
 }
 
@@ -412,91 +407,73 @@ function removeImageContextMenu() {
     }
 }
 
-// 创建悬浮窗元素
-function createFloatingWindow() {
-    floatingWindow = document.createElement('div');
-    floatingWindow.style.position = 'fixed';
-    floatingWindow.style.zIndex = '9999';
-    floatingWindow.style.background = 'white';
-    floatingWindow.style.border = '1px solid black';
-    floatingWindow.style.padding = '7px';
-    floatingWindow.style.display = 'none'; // 初始状态下隐藏悬浮窗
-    document.body.appendChild(floatingWindow);
-}
-
-// 更新悬浮窗的内容和位置
-function updateFloatingWindow(part) {
-    if (part && showFloatingWindow) {
-        // 如果存在part并且showFloatingWindow为true,则更新悬浮窗内容和位置
-        floatingWindow.innerText = part.gptPart;
-
-        // 设置悬浮窗的位置,使其显示在 part 左下角
-        let rect = mainElement.getBoundingClientRect();
-        let floatingWindowRect = floatingWindow.getBoundingClientRect();
-
-        // 计算悬浮窗的左边距
-        let left = rect.left;
-
-        // 计算悬浮窗的上边距
-        let top = rect.top + part.endY;
-
-        // 检查悬浮窗是否会超出屏幕底部
-        if (top + floatingWindowRect.height > window.innerHeight) {
-            // 如果悬浮窗超出屏幕底部,将其贴着屏幕底部显示
-            top = window.innerHeight - floatingWindowRect.height;
-        }
-
-        floatingWindow.style.left = left + 'px';
-        floatingWindow.style.top = top + 'px';
-
-        floatingWindow.style.display = 'block'; // 显示悬浮窗
-    } else {
-        floatingWindow.style.display = 'none'; // 隐藏悬浮窗
-    }
-}
-
-// 查找鼠标当前覆盖的part
-function findCurrentPart(mouseX, mouseY) {
-    console.log(mouseY);
-
-    let rect = mainElement.getBoundingClientRect();
-
-    // 判断鼠标是否在mainElement的区域内
-    if (mouseX < rect.left || mouseX > rect.right) {
-        // 如果鼠标在横轴方向不在mainElement区域内,直接返回null
-        return null;
-    }
-
-    // 将鼠标的绝对坐标转换为相对于mainElement的坐标
-    let relativeY = mouseY - rect.top;
-
-    // 遍历parts数组,查找鼠标当前覆盖的part
-    for (let part of parts) {
-        if (relativeY >= part.startY && relativeY <= part.endY) {
-            // 如果鼠标在纵轴方向覆盖了当前part,则返回该part
-            return part;
-        }
-    }
-
-    // 如果没有找到覆盖的part,返回null
-    return null;
-}
-
-let currentPart = null; // 记录当前鼠标所在的 part
 // 监听 mousemove 事件
 document.addEventListener('mousemove', function (event) {
-    if (showFloatingWindow) {
-        currentPart = findCurrentPart(event.clientX, event.clientY);
-        updateFloatingWindow(currentPart); // 更新悬浮窗的内容和位置
+    // 获取所有的分割线元素
+    let dividers = document.querySelectorAll('.分割线');
+
+    // 获取 mainElement 的位置信息
+    let mainRect = mainElement.getBoundingClientRect();
+
+    // 判断鼠标是否在 mainElement 的区域内
+    if (event.clientX < mainRect.left || event.clientX > mainRect.right) {
+        // 如果鼠标在横轴方向不在 mainElement 区域内,隐藏所有分割线的 gptTextElement
+        dividers.forEach(divider => {
+            let gptTextElement = divider.querySelector('.gptText');
+            if (gptTextElement) {
+                gptTextElement.style.display = 'none';
+            }
+        });
+        return;
+    }
+
+    // 将分割线元素转换为数组
+    let dividersArray = Array.from(dividers);
+
+    // 找到第一个 y 坐标大于鼠标 y 坐标的分割线
+    let targetDivider = dividersArray.find(divider => {
+        let rect = divider.getBoundingClientRect();
+        return rect.top > event.clientY;
+    });
+
+    // 如果找到了目标分割线
+    if (targetDivider) {
+        // 显示目标分割线的 gptTextElement
+        let gptTextElement = targetDivider.querySelector('.gptText');
+        if (gptTextElement) {
+            gptTextElement.style.display = 'block';
+        }
+
+        // 隐藏其他分割线的 gptTextElement
+        dividersArray.forEach(divider => {
+            if (divider !== targetDivider) {
+                let otherGptTextElement = divider.querySelector('.gptText');
+                if (otherGptTextElement) {
+                    otherGptTextElement.style.display = 'none';
+                }
+            }
+        });
+    } else {
+        // 如果没有找到目标分割线,则隐藏所有分割线的 gptTextElement
+        dividersArray.forEach(divider => {
+            let gptTextElement = divider.querySelector('.gptText');
+            if (gptTextElement) {
+                gptTextElement.style.display = 'none';
+            }
+        });
     }
 });
-
-
-// 定义一个函数,用于显示或隐藏所有 part 的绿色拐角
-function togglePartCorners() {
-    for (let part of parts) {
-        for (let div of part.cornerDivs) {
-            div.style.display = (div.style.display === 'none' ? 'block' : 'none');
+// 定义一个函数,用于显示或隐藏所有 part 的分割线
+function controlDividersShow() {
+    let dividers = document.querySelectorAll('.分割线');
+    for (let divider of dividers) {
+        // 判断当前分割线是否可见（通过检查其 display 属性）
+        if (divider.style.display === 'none') {
+            // 如果分割线当前是隐藏的，则显示它
+            divider.style.display = ''; // 清空 display 属性以显示分割线
+        } else {
+            // 如果分割线当前是显示的，则隐藏它
+            divider.style.display = 'none'; // 设置 display 为 'none' 隐藏分割线
         }
     }
 }
@@ -600,8 +577,9 @@ function extractChildText() {
         }
     }
 
-    // 遍历mainElement的直接子元素
-    let currentPart = null; // 当前正在合并的part
+    // 遍历mainElement的直接子元素，并收集内嵌文本
+    let partIndex = 0; // part 的索引
+    let accumulatedText = ''; // 用于累积子元素的内嵌文本
     for (let child of mainElement.children) {
         // 如果子元素宽度不等于众数宽度,则跳过
         if (child.offsetWidth !== modeWidth) {
@@ -611,91 +589,48 @@ function extractChildText() {
         // 获取子元素的内嵌文本,并去除首尾空格
         let text = child.innerText.trim();
 
-        // 如果内嵌文本不为空
-        if (text !== '') {
-            // 如果当前没有正在合并的part,或者合并后的文本长度大于等于250,则创建新的part
-            if (!currentPart || (currentPart.text + text).length >= 250) {
-                let rect = child.getBoundingClientRect();
-                currentPart = {
-                    text: text,
-                    gptPart: null, // 初始化gptPart为null
-                    startY: rect.top - mainElement.getBoundingClientRect().top,
-                    endY: rect.bottom - mainElement.getBoundingClientRect().top
-                };
-                parts.push(currentPart);
-            } else {
-                // 否则,将文本合并到当前的part
-                currentPart.text += text;
-                currentPart.endY = child.getBoundingClientRect().bottom - mainElement.getBoundingClientRect().top;
-            }
+        // 如果内嵌文本为空，则跳过
+        if (text === '') {
+            continue;
+        }
+
+        // 将非空的内嵌文本加入到累积文本中
+        accumulatedText += text;
+
+        // 检查累积的内嵌文本长度是否大于250
+        if (accumulatedText.length > 250) {
+            // 创建要插入的div元素，并设置类名和成员
+            let divider = document.createElement('div');
+            divider.className = '分割线'; // 设置类名
+            divider.className += ` 分割线-${partIndex}`; // 添加具有索引的类名，以区分不同的分割线
+            // 设置分割线的样式，使其可见
+            divider.style.borderTop = '2px solid #ccc'; // 上边框
+            divider.style.padding = '1px'; // 内间距
+            divider.style.margin = '1px 0'; // 外间距
+            divider.style.display = 'none';
+            divider.style.backgroundColor = '#f9f9f9'; // 背景色
+            // 创建并隐藏包含累积文本的成员，不在页面上显示
+            // 创建新的DOM元素来存储gptText
+            const textElement = document.createElement('div');
+            textElement.className = 'text'; // 给元素添加一个类名，便于以后的查询
+            textElement.style.display = 'none';
+            textElement.innerText = accumulatedText
+
+            divider.appendChild(textElement);
+
+            // 将分割线div插入到当前子元素中
+            child.appendChild(divider);
+
+            // 清空累积的内嵌文本，为下次累积做准备
+            accumulatedText = '';
+            // 增加part索引，为下一个分割线做准备
+            partIndex++;
         }
     }
-    // 根据 parts 数组,在 mainElement 上创建标识各个 part 的 div 元素,但先不显示
-    for (let i = 0; i < parts.length; i++) {
-        let part = parts[i];
 
-        // 创建四个 div 元素,分别用于标识 part 的四个拐角
-        let topLeft = document.createElement('div');
-        let topRight = document.createElement('div');
-        let bottomLeft = document.createElement('div');
-        let bottomRight = document.createElement('div');
-
-        // 获取 mainElement 的位置信息
-        let mainRect = mainElement.getBoundingClientRect();
-
-        // 设置四个拐角div的样式,使用绝对定位
-        topLeft.style.position = 'absolute';
-        topLeft.style.left = mainRect.left + 'px';
-        topLeft.style.top = mainRect.top + part.startY + 'px';
-        topLeft.style.width = '0';
-        topLeft.style.height = '0';
-        topLeft.style.borderBottom = '7px solid transparent';
-        topLeft.style.borderLeft = '7px solid royalblue';
-        topLeft.style.zIndex = '9999';
-        topLeft.style.display = 'none';
-
-        topRight.style.position = 'absolute';
-        topRight.style.left = mainRect.right - 10 + 'px';
-        topRight.style.top = mainRect.top + part.startY + 'px';
-        topRight.style.width = '0';
-        topRight.style.height = '0';
-        topRight.style.borderBottom = '7px solid transparent';
-        topRight.style.borderRight = '7px solid royalblue';
-        topRight.style.zIndex = '9999';
-        topRight.style.display = 'none';
-
-        bottomLeft.style.position = 'absolute';
-        bottomLeft.style.left = mainRect.left + 'px';
-        bottomLeft.style.top = mainRect.top + part.endY - 10 + 'px';
-        bottomLeft.style.width = '0';
-        bottomLeft.style.height = '0';
-        bottomLeft.style.borderTop = '7px solid transparent';
-        bottomLeft.style.borderLeft = '7px solid royalblue';
-        bottomLeft.style.zIndex = '9999';
-        bottomLeft.style.display = 'none';
-
-        bottomRight.style.position = 'absolute';
-        bottomRight.style.left = mainRect.right - 10 + 'px';
-        bottomRight.style.top = mainRect.top + part.endY - 10 + 'px';
-        bottomRight.style.width = '0';
-        bottomRight.style.height = '0';
-        bottomRight.style.borderTop = '7px solid transparent';
-        bottomRight.style.borderRight = '7px solid royalblue';
-        bottomRight.style.zIndex = '9999';
-        bottomRight.style.display = 'none';
-
-        // 将四个拐角 div 添加到 document.body 中,而不是 mainElement
-        document.body.appendChild(topLeft);
-        document.body.appendChild(topRight);
-        document.body.appendChild(bottomLeft);
-        document.body.appendChild(bottomRight);
-
-        // 将四个拐角 div 存储到 part 对象中,以便后续显示
-        part.cornerDivs = [topLeft, topRight, bottomLeft, bottomRight];
-    }
 }
 
-async function analyzePart(part) {
+async function analyzePart(divider) {
     // 循环判断 rightClicked 是否为 true
     while (!rightClicked) {
         // 如果 rightClicked 不为 true,等待 1 秒后再次判断
@@ -704,6 +639,10 @@ async function analyzePart(part) {
 
     const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-Uu3jdGcVYyZymoTX63C4Cf38E7A44198982490612d1f48D5';
+
+    // 获取分割线中的文本内容
+    const partText = divider.textContent; // 假设divider是包含文本的DOM元素
+
     const requestBody = {
         model: 'gpt-3.5-turbo-0125',
         stream: false,
@@ -714,7 +653,7 @@ async function analyzePart(part) {
             },
             {
                 role: 'user',
-                content: part.text
+                content: partText
             }
         ]
     };
@@ -734,11 +673,17 @@ async function analyzePart(part) {
         }
 
         const responseData = await response.json();
-        part.gptPart = responseData.choices[0].message.content;
-        for (let div of part.cornerDivs) {
-            div.style.borderLeftColor = 'green';
-            div.style.borderRightColor = 'green';
-        }
+        // 将API返回的内容赋值给divider的gptText属性
+        console.log(divider);
+
+        // 创建新的DOM元素来存储gptText
+        const gptTextElement = document.createElement('div');
+        gptTextElement.style.display = 'none'; // 隐藏元素，不在页面上显示
+        gptTextElement.className = 'gptText'; // 给元素添加一个类名，便于以后的查询
+        gptTextElement.innerText = responseData.choices[0].message.content;
+
+        // 将新创建的元素添加到分割线元素中
+        divider.appendChild(gptTextElement);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
@@ -967,7 +912,6 @@ async function askGpt4Vision(userContent, area, imageUrl) {
 }
 
 async function askClaude3Vision(userContent, area, imageUrl) {
-    return;
     const apiUrl = 'https://api.onechat.fun/v1/chat/completions';
     const apiKey = 'sk-nsvh2iZjUIkWXoko9fFe8a5e8a904aF39b4688FbF8B2F057';
 

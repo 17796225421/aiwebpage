@@ -693,7 +693,8 @@ async function analyzePart(divider) {
                 role: 'user',
                 content: partText
             }
-        ]
+        ],
+        max_tokens: 4096
     };
 
     try {
@@ -724,6 +725,7 @@ async function analyzePart(divider) {
         gptTextElement.style.lineHeight = '1.1'; // 设置行距
         // 将新创建的元素添加到分割线元素中
         divider.appendChild(gptTextElement);
+        generateQuestion(partText, responseData.choices[0].message.content, gptTextElement);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
@@ -798,6 +800,7 @@ async function askGpt4(systemContent, userContent, area) {
                 }
             }
         }
+        generateQuestion(userContent, area.innerText, area);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
@@ -872,6 +875,7 @@ async function askClaude3(systemContent, userContent, area) {
                 }
             }
         }
+        generateQuestion(userContent, area.innerText, area);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
@@ -950,6 +954,7 @@ async function askGpt4Vision(userContent, area, imageUrl) {
                 }
             }
         }
+        generateQuestion(userContent, area.innerText, area);
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
@@ -1032,6 +1037,50 @@ async function askClaude3Vision(userContent, area, imageUrl) {
                 }
             }
         }
+        generateQuestion(userContent, area.innerText, area);
+    } catch (error) {
+        console.error("请求失败:", error);
+        // 这里可以根据需要进行错误处理,例如重试或提示用户
+    }
+}
+
+async function generateQuestion(userContent, answer, area) {
+    const apiUrl = 'https://sapi.onechat.fun/v1/chat/completions';
+    const apiKey = 'sk-Uu3jdGcVYyZymoTX63C4Cf38E7A44198982490612d1f48D5';
+
+    // 构建请求体
+    const requestBody = {
+        model: 'gpt-3.5-turbo-0125',
+        stream: false,
+        max_tokens: 4096,
+        messages: [
+            {
+                role: 'system',
+                content: '你是一个擅长生成多个问题的助手，每个问题占一行'
+            },
+            {
+                role: 'user',
+                content: "背景信息: " + userContent + "\n已有答案: " + answer
+            }
+        ],
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`服务器响应异常: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        area.innerText += '\n\n' + responseData.choices[0].message.content;
     } catch (error) {
         console.error("请求失败:", error);
         // 这里可以根据需要进行错误处理,例如重试或提示用户
